@@ -1,0 +1,29 @@
+{
+  "name": "Xacres",
+  "short_name": "Xacres",
+  "description": "Discover lands easily across Haryana with Xacres.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "orientation": "portrait",
+  "lang": "en",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/appLogo1.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/appLogo2.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/appLogo3.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}

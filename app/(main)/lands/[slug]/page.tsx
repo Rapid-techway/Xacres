@@ -1,95 +1,125 @@
 import { Metadata } from "next"
 import Link from "next/link"
 import { Loader2 } from "lucide-react"
+import { cache } from "react"
 
 import { landService } from "@/services/land.service"
 import { FlattenedLand } from "@/lib/types"
 import LandView from "./LandView"
 
 interface PageProps {
-  params: Promise<{ slug: string }>;
+  params: { slug: string }
 }
 
 /**
- * Fetch land data on the server
+ * ✅ Cached fetch (prevents double API calls)
  */
-async function getLandData(slug: string): Promise<FlattenedLand | null> {
+const getLandCached = cache(async (slug: string) => {
   try {
-    // 1. Fetch land by slug
     const land = await landService.getLandBySlug(slug)
-    
     if (!land) return null
 
-    // 2. Fetch polygon by land ID
     const polygonDoc = await landService.getLandPolygonByLandId(land.$id!)
-    
-    // 3. Compose FlattenedLand (Public Version)
+
     return {
       ...land,
       polygon: polygonDoc?.polygon || null,
       id: land.$id,
-      $id: land.$id
-    }
+      $id: land.$id,
+    } as FlattenedLand
   } catch (error) {
-    console.error("Error fetching land details on server:", error)
+    console.error("Error fetching land:", error)
     return null
   }
-}
+})
 
 /**
- * Dynamic Metadata Generation for SEO & OG
+ * ✅ SEO + OG Metadata
  */
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const { slug } = await params
-  const land = await landService.getLandBySlug(slug)
+  const { slug } = params
+  const land = await getLandCached(slug)
 
   if (!land) {
     return {
       title: "Property Not Found | Xacres",
-      description: "The agricultural land you are looking for was not found or link is invalid."
+      description:
+        "The agricultural land you are looking for was not found or link is invalid.",
     }
   }
 
-  const title = `${land.area} Acres ${land.type} in ${land.village} | Xacres`
-  const description = land.description?.slice(0, 160) || `Buy premium ${land.type} land in ${land.district}, Haryana. Verified listing on Xacres.`
-  const imageUrl = land.images?.[0]?.url || ""
+  const title = `${land.area} Acres ${land.type} Land in ${land.village}, ${land.district}, Haryana | Xacres`
+
+  const description =
+    land.description?.slice(0, 140) ||
+    `${land.area} acre ${land.type} land for sale in ${land.village}, ${land.district}, Haryana. View map, images & contact details on Xacres.`
+
+  const imageUrl = land.images?.[0]?.url || "/logoFull.png"
 
   return {
+    metadataBase: new URL("https://xacres.com"),
+
     title,
     description,
+
+    alternates: {
+      canonical: `/lands/${slug}`,
+    },
+
     openGraph: {
       title,
       description,
-      images: imageUrl ? [{ url: imageUrl, width: 1200, height: 630 }] : [],
+      url: `/lands/${slug}`,
       type: "website",
+      images: [
+        {
+          url: imageUrl,
+          width: 1200,
+          height: 630,
+        },
+      ],
     },
+
     twitter: {
       card: "summary_large_image",
       title,
       description,
-      images: imageUrl ? [imageUrl] : [],
-    }
+      images: [imageUrl],
+    },
+
+    robots: {
+      index: true,
+      follow: true,
+    },
   }
 }
 
+/**
+ * ✅ Page
+ */
 export default async function PublicLandDetailsPage({ params }: PageProps) {
-  const { slug } = await params
-  const data = await getLandData(slug)
+  const { slug } = params
+  const data = await getLandCached(slug)
 
-  // Property Not Found State
+  // ❌ Not Found UI
   if (!data) {
     return (
       <div className="max-w-6xl mx-auto px-4 py-24 text-center space-y-6">
         <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gray-50 mb-4">
           <Loader2 className="w-10 h-10 text-gray-300" />
         </div>
-        <h1 className="text-3xl font-bold text-gray-900">Property not found</h1>
+
+        <h1 className="text-3xl font-bold text-gray-900">
+          Property not found
+        </h1>
+
         <p className="text-gray-500 max-w-md mx-auto leading-relaxed">
-          The agricultural land you are looking for might have been removed or the link is incorrect. 
-          Browse our latest verified listings below.
+          The agricultural land you are looking for might have been removed or
+          the link is incorrect. Browse our latest verified listings below.
         </p>
-        <Link 
-          href="/lands" 
+
+        <Link
+          href="/lands"
           className="inline-block bg-gray-900 text-white px-10 py-3.5 rounded-2xl font-bold hover:bg-black transition-all shadow-xl shadow-gray-100 active:scale-95"
         >
           Explore Verified Lands
@@ -98,6 +128,6 @@ export default async function PublicLandDetailsPage({ params }: PageProps) {
     )
   }
 
-  // Render Client-side View
+  // ✅ Render Client Component
   return <LandView data={data} />
 }
