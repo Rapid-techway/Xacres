@@ -1,0 +1,148 @@
+'use client';
+
+import { useEffect, useState, useMemo } from 'react';
+import { landService } from '@/services/land.service';
+import { Land } from '@/lib/types';
+import { useFilterStore } from '@/store/useFilterStore';
+import LandCard from '@/components/common/LandCard';
+import { LayoutGrid, MapPin, Trash2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import Link from 'next/link';
+
+export default function PublicLandsPage() {
+  const [lands, setLands] = useState<Land[]>([]);
+  const [loading, setLoading] = useState(true);
+  
+  const { 
+    location, 
+    minPrice, maxPrice, 
+    minSize, maxSize,
+    resetFilters
+  } = useFilterStore();
+
+  useEffect(() => {
+    async function fetchLands() {
+      try {
+        setLoading(true);
+        // We fetch public lands only
+        const { documents } = await landService.getLands();
+        // Filter out non-public lands just in case, though the service should handle it if we add a query
+        setLands(documents.filter(l => l.isPublic));
+      } catch (error) {
+        console.error('Error fetching lands:', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchLands();
+  }, []);
+
+  const filteredLands = useMemo(() => {
+    return lands.filter(land => {
+      // Location filter (District or Village)
+      if (location && !land.district.toLowerCase().includes(location.toLowerCase()) && 
+          !land.village.toLowerCase().includes(location.toLowerCase())) {
+        return false;
+      }
+
+      // Price filter
+      if (minPrice && land.price < minPrice) return false;
+      if (maxPrice && land.price > maxPrice) return false;
+
+      // Size filter (Area)
+      if (minSize && land.area < minSize) return false;
+      if (maxSize && land.area > maxSize) return false;
+
+      return true;
+    });
+  }, [lands, location, minPrice, maxPrice, minSize, maxSize]);
+
+  const hasActiveFilters = location || minPrice || maxPrice || minSize || maxSize;
+
+  return (
+    <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-10 py-8">
+      {/* Page Header / Results Count */}
+      <div className="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">
+            {location ? `Lands in ${location}` : 'All Agricultural Lands'}
+          </h1>
+          <p className="text-gray-500 font-medium">
+            {filteredLands.length} {filteredLands.length === 1 ? 'property' : 'properties'} found
+          </p>
+        </div>
+
+        {hasActiveFilters && (
+          <Button 
+            variant="outline" 
+            onClick={resetFilters}
+            className="rounded-full border-gray-300 font-bold text-gray-700 hover:bg-gray-50 gap-2"
+          >
+            <Trash2 size={16} />
+            Clear all filters
+          </Button>
+        )}
+      </div>
+
+      {/* Main Content */}
+      {loading ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-6 gap-y-10">
+          {[...Array(10)].map((_, i) => (
+            <div key={i} className="flex flex-col gap-3 animate-pulse">
+              <div className="aspect-square w-full bg-gray-200 rounded-2xl" />
+              <div className="h-4 bg-gray-200 rounded w-3/4" />
+              <div className="h-3 bg-gray-200 rounded w-1/2" />
+              <div className="h-4 bg-gray-200 rounded w-1/4 mt-2" />
+            </div>
+          ))}
+        </div>
+      ) : filteredLands.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-24 bg-gray-50 rounded-[32px] border border-dashed border-gray-200">
+          <div className="w-16 h-16 bg-white rounded-2xl shadow-sm flex items-center justify-center text-gray-300 mb-6">
+            <LayoutGrid size={32} />
+          </div>
+          <h2 className="text-xl font-bold text-gray-900 mb-2">No matching lands</h2>
+          <p className="text-gray-500 mb-8 max-w-sm text-center font-medium">
+            Try adjusting your filters or search criteria to find what you&apos;re looking for.
+          </p>
+          <Button 
+            onClick={resetFilters}
+            className="bg-gray-900 hover:bg-black text-white font-bold rounded-xl px-8 h-12 shadow-lg"
+          >
+            Clear all filters
+          </Button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-6 gap-y-10">
+          {filteredLands.map((land) => (
+            <LandCard key={land.$id} land={land} />
+          ))}
+        </div>
+      )}
+
+      {/* Floating View Switcher */}
+      <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-30 sm:hidden md:block">
+        <Link 
+          href="/"
+          className="flex items-center gap-2 bg-gray-900 hover:bg-black text-white px-5 py-3 rounded-full shadow-2xl transition-all hover:scale-105 active:scale-95 font-bold text-[14px]"
+        >
+          <span>Show map</span>
+          <MapPin size={18} />
+        </Link>
+      </div>
+
+      {/* Bottom Info */}
+      {!loading && filteredLands.length > 0 && (
+        <div className="mt-20 pt-12 border-t border-gray-100 flex flex-col items-center gap-4 text-center">
+          <p className="text-gray-500 font-medium">
+            Continue exploring more amazing agricultural lands in Haryana.
+          </p>
+          <div className="flex items-center gap-2 text-xs font-bold text-gray-400 uppercase tracking-widest bg-gray-50 px-4 py-2 rounded-full">
+            <MapPin size={12} />
+            Showing results for 15+ Districts
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
