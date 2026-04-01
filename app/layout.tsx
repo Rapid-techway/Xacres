@@ -16,6 +16,12 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Xacres - Discover Agricultural Land",
   description: "Platform for discovering agricultural lands in Haryana, India.",
+
+  // ✅ IMPORTANT: link manifest
+  manifest: "/manifest.json",
+
+  // (optional but good)
+  themeColor: "#ffffff",
 }
 
 export default function RootLayout({
