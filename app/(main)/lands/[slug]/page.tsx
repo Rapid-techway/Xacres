@@ -8,14 +8,16 @@ import { FlattenedLand } from "@/lib/types"
 import LandView from "./LandView"
 
 interface PageProps {
-  params: { slug: string }
+  params: Promise<{ slug: string }> // ✅ FIXED
 }
 
 /**
- * ✅ Cached fetch (prevents double API calls)
+ * ✅ Cached fetch (single API call shared)
  */
 const getLandCached = cache(async (slug: string) => {
   try {
+    if (!slug) return null // safety
+
     const land = await landService.getLandBySlug(slug)
     if (!land) return null
 
@@ -37,7 +39,8 @@ const getLandCached = cache(async (slug: string) => {
  * ✅ SEO + OG Metadata
  */
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const { slug } = params
+  const { slug } = await params // ✅ FIXED
+
   const land = await getLandCached(slug)
 
   if (!land) {
@@ -98,7 +101,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
  * ✅ Page
  */
 export default async function PublicLandDetailsPage({ params }: PageProps) {
-  const { slug } = params
+  const { slug } = await params // ✅ FIXED
+
   const data = await getLandCached(slug)
 
   // ❌ Not Found UI
