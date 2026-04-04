@@ -3,7 +3,7 @@ import { HaryanaFocusSection } from "@/components/home/haryana-focus-section"
 import { HowItWorks } from "@/components/home/how-it-works"
 import { WhyXacres } from "@/components/home/why-xacres"
 import { CTASection } from "@/components/home/cta-section"
-import { Footer } from "@/components/home/footer"
+import { Footer1 } from "@/components/home/footer1"
 
 export default function Home() {
   return (
@@ -13,7 +13,7 @@ export default function Home() {
       <HowItWorks />
       <WhyXacres />
       <CTASection />
-      <Footer />
+      <Footer1 />
     </main>
   )
 }

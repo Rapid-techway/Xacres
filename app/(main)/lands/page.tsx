@@ -6,12 +6,35 @@ import LandCard from '@/components/common/LandCard';
 import { LayoutGrid, MapPin, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
+import { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function PublicLandsPage() {
   const { resetFilters } = useFilterStore();
   const { filteredLands, isLoading, totalCount } = useFilteredLands();
+  const [showButton, setShowButton] = useState(true);
+  const footerSentinelRef = useRef<HTMLDivElement>(null);
   
   const hasActiveFilters = totalCount > filteredLands.length;
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        // Hide button when the sentinel (bottom info) enters 20% of the viewport
+        setShowButton(!entry.isIntersecting);
+      },
+      { 
+        threshold: 0,
+        rootMargin: '0px 0px -100px 0px' // Trigger slightly before it hits the bottom
+      }
+    );
+
+    if (footerSentinelRef.current) {
+      observer.observe(footerSentinelRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
 
   return (
     <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-10 py-8">
@@ -75,19 +98,31 @@ export default function PublicLandsPage() {
       )}
 
       {/* Floating View Switcher */}
-      <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-30 sm:hidden md:block">
-        <Link 
-          href="/"
-          className="flex items-center gap-2 bg-gray-900 hover:bg-black text-white px-5 py-3 rounded-full shadow-2xl transition-all hover:scale-105 active:scale-95 font-bold text-[14px]"
-        >
-          <span>Show map</span>
-          <MapPin size={18} />
-        </Link>
-      </div>
+      <AnimatePresence>
+        {showButton && (
+          <motion.div 
+            initial={{ opacity: 0, y: 20, x: '-50%' }}
+            animate={{ opacity: 1, y: 0, x: '-50%' }}
+            exit={{ opacity: 0, y: 20, x: '-50%' }}
+            className="fixed bottom-12 left-1/2 z-30"
+          >
+            <Link 
+              href="/"
+              className="flex items-center gap-2 bg-gray-900 hover:bg-black text-white px-5 py-3 rounded-full shadow-2xl transition-all hover:scale-105 active:scale-95 font-bold text-[14px]"
+            >
+              <span>Show map</span>
+              <MapPin size={18} />
+            </Link>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Bottom Info */}
       {!isLoading && filteredLands.length > 0 && (
-        <div className="mt-20 pt-12 border-t border-gray-100 flex flex-col items-center gap-4 text-center">
+        <div 
+          ref={footerSentinelRef}
+          className="mt-20 pt-12 border-t border-gray-100 flex flex-col items-center gap-4 text-center"
+        >
           <p className="text-gray-500 font-medium">
             Continue exploring more amazing agricultural lands in Haryana.
           </p>

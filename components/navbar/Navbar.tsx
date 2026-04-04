@@ -1,9 +1,18 @@
+'use client';
+
 import Logo from './Logo';
 import NavbarSearch from './NavbarSearch';
 import MobileSearch from './MobileSearch';
+import ViewToggle from './ViewToggle';
 import { UserCircle2 } from 'lucide-react';
+import { usePathname } from 'next/navigation';
 
 export default function Navbar() {
+  const pathname = usePathname();
+  
+  // Check if we are on a land detail page (e.g., /lands/some-id)
+  const isLandDetailPage = pathname.startsWith('/lands/') && pathname !== '/lands';
+
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-background border-b border-border">
       <div className="max-w-7xl mx-auto sm:px-6 lg:px-8 h-20 flex items-center justify-between relative sm:gap-2">
@@ -12,14 +21,20 @@ export default function Navbar() {
           <Logo />
         </div>
 
-        {/* Center: Search Filters */}
+        {/* Center: Search Filters OR View Toggle */}
         <div className="flex-[2] flex justify-center sm:px-4 min-w-0">
-          <div className="hidden md:block w-full">
-            <NavbarSearch />
-          </div>
-          <div className="block md:hidden w-full justify-center">
-            <MobileSearch />
-          </div>
+          {isLandDetailPage ? (
+            <ViewToggle />
+          ) : (
+            <>
+              <div className="hidden md:block w-full">
+                <NavbarSearch />
+              </div>
+              <div className="block md:hidden w-full justify-center">
+                <MobileSearch />
+              </div>
+            </>
+          )}
         </div>
 
         {/* Right: User Actions / Admin Only Profile Icon */}

@@ -311,7 +311,7 @@ export default function ImageGrid({ images, title }: ImageGridProps) {
                 onLoad={() => setIsImageLoaded(true)}
               />
               {!isImageLoaded && (
-                <div className="absolute sm:mx-40 my-50 inset-0 bg-white/5 animate-pulse rounded-2xl border border-white/10" />
+                <div className="absolute sm:mx-40 my-50 sm:my-0 inset-0 bg-white/5 animate-pulse rounded-2xl border border-white/10" />
               )}
             </div>
           </div>
