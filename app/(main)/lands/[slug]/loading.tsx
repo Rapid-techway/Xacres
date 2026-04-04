@@ -13,7 +13,7 @@ export default function Loading() {
       </div>
 
       {/* Image Grid Skeleton (Airbnb Style) */}
-      <div className="grid grid-cols-1 md:grid-cols-4 md:grid-rows-2 h-[350px] md:h-[450px] gap-2 md:gap-3 rounded-3xl overflow-hidden shadow-sm">
+      <div className="grid grid-cols-1 md:grid-cols-4 md:grid-rows-2 h-[200px] sm:h-[350px] md:h-[450px] gap-2 md:gap-3 rounded-3xl overflow-hidden shadow-sm">
         <div className="md:col-span-2 md:row-span-2 bg-gray-200 h-full w-full" />
         <div className="hidden md:block bg-gray-200 h-full w-full" />
         <div className="hidden md:block bg-gray-200 h-full w-full" />
@@ -28,13 +28,12 @@ export default function Loading() {
           {/* Summary Skeleton */}
           <div className="space-y-8">
             <div className="flex items-center gap-6">
-              <div className="h-14 w-14 bg-gray-200 rounded-full" />
               <div className="space-y-3 flex-1">
                 <div className="h-6 w-1/4 bg-gray-200 rounded-full" />
                 <div className="h-4 w-1/2 bg-gray-200 rounded-full" />
               </div>
             </div>
-            
+
             {/* Description Paragraphs */}
             <div className="space-y-4 pt-4">
               <div className="h-4 w-full bg-gray-100 rounded-full" />
@@ -48,7 +47,7 @@ export default function Loading() {
           <div className="space-y-6">
             <div className="h-8 w-60 bg-gray-200 rounded-full" />
             <div className="h-[450px] rounded-[40px] bg-gray-50 border border-gray-100 shadow-inner flex items-center justify-center">
-               <div className="text-gray-300 font-bold text-xl uppercase tracking-widest">Map Loading...</div>
+              <div className="text-gray-300 font-bold text-xl uppercase tracking-widest">Map Loading...</div>
             </div>
           </div>
         </div>
@@ -62,8 +61,8 @@ export default function Loading() {
                 <div className="mx-auto h-10 w-full bg-gray-200 rounded-2xl animate-pulse" />
               </div>
               <div className="w-full bg-gray-50 rounded-3xl p-5 space-y-3 border border-gray-100/50">
-                 <div className="h-6 w-1/2 bg-gray-200 rounded-full" />
-                 <div className="h-4 w-3/4 bg-gray-200 rounded-full" />
+                <div className="h-6 w-1/2 bg-gray-200 rounded-full" />
+                <div className="h-4 w-3/4 bg-gray-200 rounded-full" />
               </div>
               <div className="h-10 w-full bg-gray-100 rounded-2xl" />
             </div>

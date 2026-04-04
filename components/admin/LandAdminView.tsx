@@ -60,8 +60,9 @@ export default function LandAdminView({ data }: LandAdminViewProps) {
         <PriceStickyCard
           price={data.price}
           area={data.area}
-          type={data.type}
-        />
+          type={data.type} 
+          title={data.title} 
+          slug={data.slug}        />
       </div>
 
       {/* Admin Only Section (Bottom) */}
