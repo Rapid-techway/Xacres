@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Marker, Tooltip, useMap } from 'react-leaflet';
 import { useFilterStore } from '@/store/useFilterStore';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface DistrictPosition {
   lat: number;
@@ -14,11 +15,14 @@ export default function DistrictLayer() {
   const map = useMap();
   const { location } = useFilterStore();
   const [position, setPosition] = useState<DistrictPosition | null>(null);
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     if (!location || !map) {
       return;
     }
+
+    let timeoutId: NodeJS.Timeout;
 
     const fetchDistrictCoords = async () => {
       try {
@@ -36,10 +40,15 @@ export default function DistrictLayer() {
           setPosition({ lat, lng, name: location });
 
           // Smoothly fly to the point
-          map.flyTo([lat, lng], 11, {
+          map.flyTo([lat, lng], isMobile ? 9 : 10, {
             duration: 1.5,
             easeLinearity: 0.25
           });
+
+          // Disappear after 5 seconds
+          timeoutId = setTimeout(() => {
+            setPosition(null);
+          }, 5000);
         }
       } catch (error) {
         console.error('Error fetching district coordinates from Nominatim:', error);
@@ -49,8 +58,11 @@ export default function DistrictLayer() {
     fetchDistrictCoords();
 
     // Reset position when location changes or component unmounts
-    return () => setPosition(null);
-  }, [location, map]);
+    return () => {
+      setPosition(null);
+      if (timeoutId) clearTimeout(timeoutId);
+    };
+  }, [location, map, isMobile]);
 
   if (!position) return null;
 

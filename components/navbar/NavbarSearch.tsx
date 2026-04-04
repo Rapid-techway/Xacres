@@ -7,24 +7,27 @@ import SearchPanelContainer from './filters/SearchPanelContainer';
 import LocationFilter from './filters/LocationFilter';
 import PriceFilter from './filters/PriceFilter';
 import SizeFilter from './filters/SizeFilter';
-
-const formatPrice = (value: number) => {
-  if (value >= 10000000) return `${(value / 10000000).toFixed(1)}Cr`;
-  if (value >= 100000) return `${(value / 100000).toFixed(0)}L`;
-  return `${value}`;
-};
+import { formatPrice } from '@/lib/utils';
+import { useLandStore } from '@/store/useLandStore';
+import { filterLands } from '@/lib/filtering';
 
 export default function NavbarSearch() {
   const { 
-    location, 
-    minPrice, maxPrice, 
-    minSize, maxSize, 
-    activeFilterPanel, 
+    location,
+    minPrice, maxPrice,
+    minSize, maxSize,
+    activeFilterPanel,
     setActiveFilterPanel,
     setLocation,
     setPrice,
-    setSize
+    setSize,
+    stagedMinPrice, stagedMaxPrice,
+    stagedMinSize, stagedMaxSize,
+    applyStagedPrice, applyStagedSize,
+    syncStagedWithActive
   } = useFilterStore();
+
+  const { lands } = useLandStore();
   
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -47,6 +50,9 @@ export default function NavbarSearch() {
   }, [activeFilterPanel, setActiveFilterPanel]);
 
   const handlePanelToggle = (panel: FilterPanel) => {
+    if (panel === 'price' || panel === 'size') {
+      syncStagedWithActive();
+    }
     setActiveFilterPanel(activeFilterPanel === panel ? null : panel);
   };
 
@@ -161,14 +167,9 @@ export default function NavbarSearch() {
         </div>
 
         {/* Search Button */}
-        <div className="pr-1.5 pl-1">
-          <button className={`
-            p-3.5 rounded-full transition-all duration-300 flex items-center justify-center gap-2
-            ${activeFilterPanel ? 'bg-primary text-white px-5' : 'bg-primary text-white'}
-            hover:bg-primary/90 shadow-sm
-          `}>
+        <div className="pr-1.5 pl-1 shrink-0">
+          <button className="p-3.5 rounded-full bg-primary text-white hover:bg-primary/90 shadow-sm transition-colors flex items-center justify-center">
             <Search size={18} strokeWidth={3} />
-            {activeFilterPanel && <span className="font-bold text-[15px]">Search</span>}
           </button>
         </div>
       </div>
@@ -181,8 +182,76 @@ export default function NavbarSearch() {
         `}>
           <SearchPanelContainer>
             {activeFilterPanel === 'location' && <LocationFilter />}
-            {activeFilterPanel === 'price' && <PriceFilter />}
-            {activeFilterPanel === 'size' && <SizeFilter />}
+            
+            {activeFilterPanel === 'price' && (
+              <div className="flex flex-col gap-6">
+                <PriceFilter isStaged={true} />
+                <div className="border-t border-gray-100 pt-5 px-1 flex items-center justify-between">
+                  <div className="flex flex-wrap items-center gap-1.5 opacity-60 max-w-[240px]">
+                    <div className="flex items-center gap-1.5 bg-gray-50 border border-gray-100 px-2.5 py-1.5 rounded-xl">
+                      <MapPin size={12} className="text-foreground/40" />
+                      <span className="text-[12px] font-medium text-foreground/70 truncate max-w-[80px]">{location || 'Anywhere'}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 bg-gray-50 border border-gray-100 px-2.5 py-1.5 rounded-xl">
+                      <Sprout size={12} className="text-foreground/40" />
+                      <span className="text-[12px] font-medium text-foreground/70">{sizeText}</span>
+                    </div>
+                  </div>
+                  <button 
+                    onClick={() => {
+                      applyStagedPrice();
+                      setActiveFilterPanel(null);
+                    }}
+                    className="bg-primary hover:bg-primary/90 text-white font-bold py-3.5 px-8 rounded-2xl shadow-lg shadow-primary/20 transition-all flex items-center gap-2 group active:scale-95 shrink-0"
+                  >
+                    <span>Search</span>
+                    <span className="opacity-60 font-medium">
+                      ({filterLands(lands, { 
+                        location, 
+                        minPrice: stagedMinPrice, 
+                        maxPrice: stagedMaxPrice,
+                        minSize, maxSize 
+                      }).length})
+                    </span>
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {activeFilterPanel === 'size' && (
+              <div className="flex flex-col gap-6">
+                <SizeFilter isStaged={true} />
+                <div className="border-t border-gray-100 pt-5 px-1 flex items-center justify-between">
+                  <div className="flex flex-wrap items-center gap-1.5 opacity-60 max-w-[240px]">
+                    <div className="flex items-center gap-1.5 bg-gray-50 border border-gray-100 px-2.5 py-1.5 rounded-xl">
+                      <MapPin size={12} className="text-foreground/40" />
+                      <span className="text-[12px] font-medium text-foreground/70 truncate max-w-[80px]">{location || 'Anywhere'}</span>
+                    </div>
+                    <div className="flex items-center gap-1.5 bg-gray-50 border border-gray-100 px-2.5 py-1.5 rounded-xl">
+                      <IndianRupee size={12} className="text-foreground/40" />
+                      <span className="text-[12px] font-medium text-foreground/70 truncate max-w-[90px]">{priceText}</span>
+                    </div>
+                  </div>
+                  <button 
+                    onClick={() => {
+                      applyStagedSize();
+                      setActiveFilterPanel(null);
+                    }}
+                    className="bg-primary hover:bg-primary/90 text-white font-bold py-3.5 px-8 rounded-2xl shadow-lg shadow-primary/20 transition-all flex items-center gap-2 group active:scale-95 shrink-0"
+                  >
+                    <span>Search</span>
+                    <span className="opacity-60 font-medium">
+                      ({filterLands(lands, { 
+                        location, 
+                        minPrice, maxPrice,
+                        minSize: stagedMinSize, 
+                        maxSize: stagedMaxSize 
+                      }).length})
+                    </span>
+                  </button>
+                </div>
+              </div>
+            )}
           </SearchPanelContainer>
         </div>
       )}

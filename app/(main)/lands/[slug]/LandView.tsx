@@ -24,9 +24,9 @@ export default function LandView({ data }: LandViewProps) {
       <SubHeaderInfo data={data} />
 
       {/* Image Grid (Airbnb Style) */}
-      <ImageGrid 
-        images={data.images || []} 
-        title={data.title} 
+      <ImageGrid
+        images={data.images || []}
+        title={data.title}
       />
 
       {/* Content Layout */}
@@ -39,7 +39,7 @@ export default function LandView({ data }: LandViewProps) {
           {/* Map Section */}
           <div className="space-y-4">
             <h3 className="text-xl font-bold text-gray-900">Location & Boundaries</h3>
-            <div className="h-[450px] rounded-3xl overflow-hidden shadow-inner bg-gray-50">
+            <div className="h-[450px] rounded overflow-hidden ">
               <SubMapView
                 initialPolygon={data.polygon as GeoJsonFeatureCollection | null}
                 initialCenter={{ lat: data.latitude, lng: data.longitude }}
@@ -62,6 +62,8 @@ export default function LandView({ data }: LandViewProps) {
               price={data.price}
               area={data.area}
               type={data.type}
+              title={data.title}
+              slug={data.slug}
             />
           </div>
         </div>
@@ -73,7 +75,7 @@ export default function LandView({ data }: LandViewProps) {
           <div className="max-w-xl space-y-4 text-left">
             <h2 className="text-2xl font-bold text-gray-900">Interested in this property?</h2>
             <p className="text-gray-600 font-medium">
-              Every listing on Xacres is verified by our team. Connect with us to get more details, 
+              Every listing on Xacres is verified by our team. Connect with us to get more details,
               schedule a site visit, or discuss ownership transfers.
             </p>
           </div>

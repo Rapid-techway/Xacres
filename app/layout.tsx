@@ -19,9 +19,10 @@ export const metadata: Metadata = {
 
   // ✅ IMPORTANT: link manifest
   manifest: "/manifest.json",
+}
 
-  // (optional but good)
-  themeColor: "#ffffff",
+export const viewport = {
+  themeColor: "#ffffff"
 }
 
 export default function RootLayout({

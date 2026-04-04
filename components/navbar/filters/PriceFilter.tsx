@@ -3,28 +3,41 @@
 import { useFilterStore } from '@/store/useFilterStore';
 import { IndianRupee } from 'lucide-react';
 
-export default function PriceFilter() {
-  const { minPrice, maxPrice, setPrice } = useFilterStore();
+export default function PriceFilter({ isStaged = false }: { isStaged?: boolean }) {
+  const { 
+    minPrice: activeMin, 
+    maxPrice: activeMax, 
+    setPrice,
+    stagedMinPrice,
+    stagedMaxPrice,
+    setStagedPrice
+  } = useFilterStore();
+
+  const minPrice = isStaged ? stagedMinPrice : activeMin;
+  const maxPrice = isStaged ? stagedMaxPrice : activeMax;
+  const updatePrice = isStaged ? setStagedPrice : setPrice;
+
+  const CR_UNIT = 10000000; // 1 Crore = 10,000,000
 
   const handleMinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value ? parseInt(e.target.value, 10) : null;
-    setPrice(val, maxPrice);
+    const val = e.target.value ? parseFloat(e.target.value) * CR_UNIT : null;
+    updatePrice(val, maxPrice);
   };
 
   const handleMaxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value ? parseInt(e.target.value, 10) : null;
-    setPrice(minPrice, val);
+    const val = e.target.value ? parseFloat(e.target.value) * CR_UNIT : null;
+    updatePrice(minPrice, val);
   };
 
   const quickSelect = (presetMin: number | null, presetMax: number | null) => {
-    setPrice(presetMin, presetMax);
+    updatePrice(presetMin, presetMax);
   };
 
   const presets = [
-    { label: 'Under ₹50L', min: null, max: 5000000 },
-    { label: '₹50L - ₹1Cr', min: 5000000, max: 10000000 },
-    { label: '₹1Cr - ₹5Cr', min: 10000000, max: 50000000 },
-    { label: '₹5Cr+', min: 50000000, max: null }
+    { label: 'Under 1 Cr', min: null, max: 1 * CR_UNIT },
+    { label: '1 - 2 Cr', min: 1 * CR_UNIT, max: 2 * CR_UNIT },
+    { label: '2 - 5 Cr', min: 2 * CR_UNIT, max: 5 * CR_UNIT },
+    { label: '5 Cr+', min: 5 * CR_UNIT, max: null }
   ];
 
   return (
@@ -33,36 +46,44 @@ export default function PriceFilter() {
         <div className="p-2 bg-primary/10 rounded-xl text-primary">
           <IndianRupee size={18} />
         </div>
-        <h3 className="text-[17px] font-bold text-foreground">Budget Range</h3>
+        <h3 className="text-[17px] font-bold text-foreground">Budget (in Crores)</h3>
       </div>
       
-      <div className="grid grid-cols-2 gap-4 mb-8 px-1">
+      <div className="grid grid-cols-2 gap-4 mb-4 px-1">
         <div className="space-y-2">
           <label className="text-[11px] font-bold text-foreground/40 uppercase tracking-wider ml-1">Minimum</label>
           <div className="relative group">
-            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-foreground/30 font-medium transition-colors group-focus-within:text-primary">₹</span>
+            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-foreground/30 font-bold text-[14px]">Cr</span>
             <input 
               type="number" 
-              value={minPrice || ''}
+              step="0.1"
+              value={minPrice ? (minPrice / CR_UNIT) : ''}
               onChange={handleMinChange}
               placeholder="0"
-              className="w-full pl-8 pr-4 py-3.5 bg-gray-50 border-none rounded-2xl text-[15px] font-medium text-foreground outline-none focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-gray-300"
+              className="w-full pl-5 pr-12 py-3.5 bg-gray-50 border-none rounded-2xl text-[15px] font-bold text-foreground outline-none focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-gray-300"
             />
           </div>
         </div>
         <div className="space-y-2">
           <label className="text-[11px] font-bold text-foreground/40 uppercase tracking-wider ml-1">Maximum</label>
           <div className="relative group">
-            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-foreground/30 font-medium transition-colors group-focus-within:text-primary">₹</span>
+            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-foreground/30 font-bold text-[14px]">Cr</span>
             <input 
               type="number" 
-              value={maxPrice || ''}
+              step="0.1"
+              value={maxPrice ? (maxPrice / CR_UNIT) : ''}
               onChange={handleMaxChange}
               placeholder="Any"
-              className="w-full pl-8 pr-4 py-3.5 bg-gray-50 border-none rounded-2xl text-[15px] font-medium text-foreground outline-none focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-gray-300"
+              className="w-full pl-5 pr-12 py-3.5 bg-gray-50 border-none rounded-2xl text-[15px] font-bold text-foreground outline-none focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-gray-300"
             />
           </div>
         </div>
+      </div>
+
+      <div className="px-1 mb-8">
+        <p className="text-[13px] font-medium text-foreground/60 italic ml-1">
+          Tip: You can use decimals like 0.5 for 50 Lakh.
+        </p>
       </div>
 
       <div className="px-1">
@@ -74,10 +95,10 @@ export default function PriceFilter() {
               <button 
                 key={idx}
                 onClick={() => quickSelect(preset.min, preset.max)} 
-                className={`px-5 py-2.5 rounded-full text-[14px] font-medium transition-all duration-200 ${
+                className={`px-5 py-2.5 rounded-full text-[14px] font-bold transition-all duration-200 ${
                   isActive 
-                  ? 'bg-primary text-white shadow-md shadow-primary/20 scale-105' 
-                  : 'bg-gray-100 text-foreground/70 hover:bg-gray-200 border border-transparent'
+                  ? 'bg-gray-900 text-white shadow-md scale-105' 
+                  : 'bg-gray-100 text-foreground/70 hover:bg-gray-200'
                 }`}
               >
                 {preset.label}

@@ -12,11 +12,22 @@ const SIZE_PRESETS = [
   { label: '10+ acres', min: 10, max: null }
 ];
 
-export default function SizeFilter() {
-  const { minSize, maxSize, setSize } = useFilterStore();
+export default function SizeFilter({ isStaged = false }: { isStaged?: boolean }) {
+  const { 
+    minSize: activeMin, 
+    maxSize: activeMax, 
+    setSize,
+    stagedMinSize,
+    stagedMaxSize,
+    setStagedSize
+  } = useFilterStore();
+
+  const minSize = isStaged ? stagedMinSize : activeMin;
+  const maxSize = isStaged ? stagedMaxSize : activeMax;
+  const updateSize = isStaged ? setStagedSize : setSize;
 
   const handleSelect = (min: number | null, max: number | null) => {
-    setSize(min, max);
+    updateSize(min, max);
   };
 
   return (

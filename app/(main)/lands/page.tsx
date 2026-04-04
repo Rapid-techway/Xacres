@@ -1,8 +1,6 @@
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
-import { landService } from '@/services/land.service';
-import { Land } from '@/lib/types';
+import { useFilteredLands } from '@/hooks/useFilteredLands';
 import { useFilterStore } from '@/store/useFilterStore';
 import LandCard from '@/components/common/LandCard';
 import { LayoutGrid, MapPin, Trash2 } from 'lucide-react';
@@ -10,54 +8,10 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 
 export default function PublicLandsPage() {
-  const [lands, setLands] = useState<Land[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { resetFilters } = useFilterStore();
+  const { filteredLands, isLoading, totalCount } = useFilteredLands();
   
-  const { 
-    location, 
-    minPrice, maxPrice, 
-    minSize, maxSize,
-    resetFilters
-  } = useFilterStore();
-
-  useEffect(() => {
-    async function fetchLands() {
-      try {
-        setLoading(true);
-        // We fetch public lands only
-        const { documents } = await landService.getLands();
-        // Filter out non-public lands just in case, though the service should handle it if we add a query
-        setLands(documents.filter(l => l.isPublic));
-      } catch (error) {
-        console.error('Error fetching lands:', error);
-      } finally {
-        setLoading(false);
-      }
-    }
-    fetchLands();
-  }, []);
-
-  const filteredLands = useMemo(() => {
-    return lands.filter(land => {
-      // Location filter (District or Village)
-      if (location && !land.district.toLowerCase().includes(location.toLowerCase()) && 
-          !land.village.toLowerCase().includes(location.toLowerCase())) {
-        return false;
-      }
-
-      // Price filter
-      if (minPrice && land.price < minPrice) return false;
-      if (maxPrice && land.price > maxPrice) return false;
-
-      // Size filter (Area)
-      if (minSize && land.area < minSize) return false;
-      if (maxSize && land.area > maxSize) return false;
-
-      return true;
-    });
-  }, [lands, location, minPrice, maxPrice, minSize, maxSize]);
-
-  const hasActiveFilters = location || minPrice || maxPrice || minSize || maxSize;
+  const hasActiveFilters = totalCount > filteredLands.length;
 
   return (
     <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-10 py-8">
@@ -65,7 +19,7 @@ export default function PublicLandsPage() {
       <div className="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">
-            {location ? `Lands in ${location}` : 'All Agricultural Lands'}
+            Agricultural Lands
           </h1>
           <p className="text-gray-500 font-medium">
             {filteredLands.length} {filteredLands.length === 1 ? 'property' : 'properties'} found
@@ -85,7 +39,7 @@ export default function PublicLandsPage() {
       </div>
 
       {/* Main Content */}
-      {loading ? (
+      {isLoading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-6 gap-y-10">
           {[...Array(10)].map((_, i) => (
             <div key={i} className="flex flex-col gap-3 animate-pulse">
@@ -132,7 +86,7 @@ export default function PublicLandsPage() {
       </div>
 
       {/* Bottom Info */}
-      {!loading && filteredLands.length > 0 && (
+      {!isLoading && filteredLands.length > 0 && (
         <div className="mt-20 pt-12 border-t border-gray-100 flex flex-col items-center gap-4 text-center">
           <p className="text-gray-500 font-medium">
             Continue exploring more amazing agricultural lands in Haryana.

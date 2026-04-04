@@ -13,6 +13,7 @@ interface ImageGridProps {
 
 export default function ImageGrid({ images, title }: ImageGridProps) {
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null)
+  const [isImageLoaded, setIsImageLoaded] = useState(false);
 
   const sortedImages = [...(images || [])].sort(
     (a, b) => (b.isPrimary ? 1 : 0) - (a.isPrimary ? 1 : 0)
@@ -24,6 +25,7 @@ export default function ImageGrid({ images, title }: ImageGridProps) {
   const handleNext = useCallback((e?: React.MouseEvent) => {
     e?.stopPropagation()
     if (selectedImageIndex !== null) {
+      setIsImageLoaded(false)
       setSelectedImageIndex((prev) => (prev! + 1) % sortedImages.length)
     }
   }, [selectedImageIndex, sortedImages.length])
@@ -31,6 +33,7 @@ export default function ImageGrid({ images, title }: ImageGridProps) {
   const handlePrev = useCallback((e?: React.MouseEvent) => {
     e?.stopPropagation()
     if (selectedImageIndex !== null) {
+      setIsImageLoaded(false)
       setSelectedImageIndex((prev) => (prev! - 1 + sortedImages.length) % sortedImages.length)
     }
   }, [selectedImageIndex, sortedImages.length])
@@ -57,9 +60,10 @@ export default function ImageGrid({ images, title }: ImageGridProps) {
     }
   }, [selectedImageIndex, handleNext, handlePrev]);
 
+  const isOpen = selectedImageIndex !== null;
   // Handle mobile back button to close full screen
   useEffect(() => {
-    if (selectedImageIndex === null) return;
+    if (!isOpen) return;
 
     // Push a dummy state to history
     window.history.pushState({ fullScreen: 'gallery' }, '');
@@ -77,7 +81,7 @@ export default function ImageGrid({ images, title }: ImageGridProps) {
         window.history.back();
       }
     };
-  }, [selectedImageIndex]);
+  }, [isOpen]); // Only run when opening/closing, not on index change
 
   if (displayImages.length === 0) {
     return (
@@ -300,11 +304,15 @@ export default function ImageGrid({ images, title }: ImageGridProps) {
                 src={sortedImages[selectedImageIndex].url}
                 alt={`${title} - Photo ${selectedImageIndex + 1}`}
                 fill
-                className="object-contain select-none"
+                className={`transition-all duration-700 object-contain select-none ${isImageLoaded ? 'opacity-100' : 'opacity-0'}`}
                 sizes="100vw"
                 quality={100}
                 priority
+                onLoad={() => setIsImageLoaded(true)}
               />
+              {!isImageLoaded && (
+                <div className="absolute sm:mx-40 my-50 inset-0 bg-white/5 animate-pulse rounded-2xl border border-white/10" />
+              )}
             </div>
           </div>
 

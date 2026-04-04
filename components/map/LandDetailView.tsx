@@ -29,18 +29,29 @@ interface LandDetailViewProps {
 export default function LandDetailView({ land, onClose }: LandDetailViewProps) {
   const isMobile = useIsMobile();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [isImageLoaded, setIsImageLoaded] = useState(false);
 
-  if (isMobile === undefined) return null;
+  // Reset state when land changes (during render is preferred over useEffect for prop sync)
+  const [lastSlug, setLastSlug] = useState(land.slug);
+  if (land.slug !== lastSlug) {
+    setLastSlug(land.slug);
+    setCurrentImageIndex(0);
+    setIsImageLoaded(false);
+  }
 
   const handlePrevImage = (e: React.MouseEvent) => {
     e.stopPropagation();
+    setIsImageLoaded(false);
     setCurrentImageIndex((prev) => (prev === 0 ? land.images.length - 1 : prev - 1));
   };
 
   const handleNextImage = (e: React.MouseEvent) => {
     e.stopPropagation();
+    setIsImageLoaded(false);
     setCurrentImageIndex((prev) => (prev === land.images.length - 1 ? 0 : prev + 1));
   };
+
+  if (isMobile === undefined) return null;
 
   const mainContent = (
     <div className="flex flex-col bg-white font-sans min-h-0 overflow-hidden">
@@ -86,8 +97,13 @@ export default function LandDetailView({ land, onClose }: LandDetailViewProps) {
               alt={`${land.area} acres - ${currentImageIndex + 1}`}
               fill
               unoptimized
-              className="object-cover transition-all duration-700"
+              onLoad={() => setIsImageLoaded(true)}
+              className={`object-cover transition-all duration-700 ${isImageLoaded ? 'opacity-100' : 'opacity-0'}`}
             />
+
+            {!isImageLoaded && (
+              <div className="absolute inset-0 bg-gray-100 animate-pulse" />
+            )}
 
             {/* Centered Navigation Overlay */}
             {land.images.length > 1 && (

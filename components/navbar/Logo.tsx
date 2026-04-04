@@ -1,10 +1,17 @@
-import Link from 'next/link';
+import Link from "next/link";
+import Image from "next/image";
 
 export default function Logo() {
   return (
-    <Link href="/" className="flex items-baseline font-bold tracking-tight text-foreground group">
-      <span className="text-3xl">X</span>
-      <span className="text-xl">acres</span>
+    <Link href="/" className="flex items-center">
+      <Image
+        src="/mainLogo.png"
+        alt="Xacres Logo"
+        width={320}
+        height={80}
+        className="h-24 w-auto"
+        priority
+      />
     </Link>
   );
 }

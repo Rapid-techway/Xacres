@@ -1,46 +1,22 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { CircleMarker, useMap } from 'react-leaflet';
+import { CircleMarker } from 'react-leaflet';
 import L from 'leaflet';
-import { landService } from '@/services/land.service';
 import { Land } from '@/lib/types';
-import { Query } from '@/lib/appwrite';
+import { useFilteredLands } from '@/hooks/useFilteredLands';
 interface LandMarkersProps {
   onSelect: (land: Land) => void;
   selectedLandId?: string;
 }
 
 export default function LandMarkers({ onSelect, selectedLandId }: LandMarkersProps) {
-  const [lands, setLands] = useState<Land[]>([]);
-  const [loading, setLoading] = useState(true);
-  const map = useMap();
+  const { filteredLands, isLoading } = useFilteredLands();
 
-  useEffect(() => {
-    async function fetchPublicLands() {
-      try {
-        setLoading(true);
-        const { documents } = await landService.getLands([
-          Query.equal('isPublic', true)
-        ]);
-        setLands(documents);
-
-        // Fetching completed, we no longer auto-zoom to markers to keep focus on Haryana
-      } catch (error) {
-        console.error('Error fetching landing markers:', error);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchPublicLands();
-  }, [map]);
-
-  if (loading || lands.length === 0) return null;
+  if (isLoading || filteredLands.length === 0) return null;
 
   return (
     <>
-      {lands.map((land) => {
+      {filteredLands.map((land) => {
         const isSelected = selectedLandId === land.$id;
 
         return (
