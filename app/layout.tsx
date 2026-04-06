@@ -13,8 +13,7 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 })
 
-export async function generateMetadata(): Promise<Metadata> {
-  return {
+export const metadata: Metadata = {
     metadataBase: new URL("https://xacres.vercel.app"),
 
     title: {
@@ -71,7 +70,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
     manifest: "/manifest.json",
   };
-}
+
 
 export const viewport = {
   themeColor: "#ffffff",
