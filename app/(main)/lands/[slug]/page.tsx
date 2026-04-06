@@ -60,8 +60,6 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const imageUrl = land.images?.[0]?.url || "/logoFull.png"
 
   return {
-    metadataBase: new URL("https://xacres.com"),
-
     title,
     description,
 
@@ -74,6 +72,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       description,
       url: `/lands/${slug}`,
       type: "website",
+      siteName: "Xacres",
+      locale: "en_IN",
       images: [
         {
           url: imageUrl,
@@ -94,6 +94,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       index: true,
       follow: true,
     },
+
+    keywords: [
+      `${land.type} land in ${land.district}`,
+      `land for sale in ${land.village}`,
+      `${land.area} acre land Haryana`,
+      `buy land in ${land.district}`,
+    ],
   }
 }
 
