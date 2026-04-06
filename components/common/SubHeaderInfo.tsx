@@ -14,11 +14,9 @@ export default function SubHeaderInfo({ data }: SubHeaderInfoProps) {
     const isCopied = await shareProperty({
       title: data.title,
       slug: data.slug,
-      area: data.area,
       district: data.district,
       village: data.village,
-      type: data.type,
-      price: data.price
+      type: data.type
     });
 
     if (isCopied) {

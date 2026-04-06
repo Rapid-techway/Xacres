@@ -23,28 +23,20 @@ export function formatPrice(price: number): string {
 export async function shareProperty({
   title,
   slug,
-  area,
   district,
   village,
-  type,
-  price
+  type
 }: {
   title: string
   slug: string
-  area: number
   district: string
   village: string
   type: string
-  price?: number
 }) {
   const shareUrl = `${window.location.origin}/lands/${slug}`;
-  const shareTitle = `${title} - ${area} Acres in ${district}`;
+  const shareTitle = `${title} in ${district}`;
   
-  let shareText = `Check out this ${type} land in ${village}, ${district}.\n\nArea: ${area} Acres`;
-  if (price) {
-    shareText += `\nPrice: ₹${formatPrice(price)}`;
-  }
-  shareText += `\n\nView details here:`;
+  const shareText = `Check out this ${type} land in ${village}, ${district}.\nView details here:`;
 
   if (navigator.share) {
     try {

@@ -18,7 +18,9 @@ const PriceStickyCard = forwardRef<HTMLDivElement, PriceStickyCardProps>(
 
     const handleWhatsApp = () => {
       const url = `${window.location.origin}/lands/${slug}`;
-      const message = `Hi, I am interested in this property: ${title}. Can I get more details on it? Link: ${url}`;
+
+      const message = `Hi, I am interested in this property: ${title}.\nCan I get more details on it?\nLink: ${url}`;
+
       const whatsappUrl = `https://wa.me/919817285068?text=${encodeURIComponent(message)}`;
       window.open(whatsappUrl, '_blank');
     };

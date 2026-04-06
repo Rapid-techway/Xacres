@@ -152,11 +152,9 @@ export default function LandDetailView({ land, onClose }: LandDetailViewProps) {
               shareProperty({
                 title: land.title,
                 slug: land.slug,
-                area: land.area,
                 district: land.district,
                 village: land.village,
-                type: land.type,
-                price: land.price
+                type: land.type
               });
             }}
             className="flex items-center justify-center w-11 h-11 rounded-2xl border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 shadow-sm transition-all active:scale-95 group"
