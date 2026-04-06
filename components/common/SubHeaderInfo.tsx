@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { MapPin, Check, Share } from "lucide-react"
 import { FlattenedLand } from "@/lib/types"
+import { shareProperty } from "@/lib/utils"
 
 interface SubHeaderInfoProps {
   data: FlattenedLand
@@ -10,23 +11,19 @@ export default function SubHeaderInfo({ data }: SubHeaderInfoProps) {
   const [copied, setCopied] = useState(false)
 
   const handleShare = async () => {
-    const url = `${window.location.origin}/lands/${data.slug}`
+    const isCopied = await shareProperty({
+      title: data.title,
+      slug: data.slug,
+      area: data.area,
+      district: data.district,
+      village: data.village,
+      type: data.type,
+      price: data.price
+    });
 
-    try {
-      if (navigator.share) {
-        await navigator.share({
-          title: data.title || "Check this land",
-          text: "Check out this property",
-          url: url,
-        })
-      } else {
-        // fallback (desktop unsupported browsers)
-        await navigator.clipboard.writeText(url)
-        setCopied(true)
-        setTimeout(() => setCopied(false), 2000)
-      }
-    } catch (err) {
-      console.error("Share failed:", err)
+    if (isCopied) {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
     }
   }
   return (

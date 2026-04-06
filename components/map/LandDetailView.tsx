@@ -19,7 +19,7 @@ import {
   DrawerContent,
   DrawerTitle,
 } from '@/components/ui/drawer';
-import { formatPrice } from '@/lib/utils';
+import { formatPrice, shareProperty } from '@/lib/utils';
 
 interface LandDetailViewProps {
   land: Land;
@@ -149,19 +149,15 @@ export default function LandDetailView({ land, onClose }: LandDetailViewProps) {
         <div className="px-6 mb-8 flex items-center gap-3">
           <button
             onClick={() => {
-              const shareUrl = `${window.location.origin}/lands/${land.slug}`;
-              const shareTitle = `${land.title} - ${land.area} Acres in ${land.district}`;
-              const shareText = `Check out this ${land.type} land in ${land.village}, ${land.district}.\n\nArea: ${land.area} Acres\nView details here:`;
-
-              if (navigator.share) {
-                navigator.share({
-                  title: shareTitle,
-                  text: shareText,
-                  url: shareUrl,
-                }).catch(console.error);
-              } else {
-                navigator.clipboard.writeText(`${shareTitle}\n${shareText}\n${shareUrl}`);
-              }
+              shareProperty({
+                title: land.title,
+                slug: land.slug,
+                area: land.area,
+                district: land.district,
+                village: land.village,
+                type: land.type,
+                price: land.price
+              });
             }}
             className="flex items-center justify-center w-11 h-11 rounded-2xl border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 shadow-sm transition-all active:scale-95 group"
             title="Share property"
