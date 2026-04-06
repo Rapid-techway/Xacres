@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
-    metadataBase: new URL("https://xacres.com"),
+    metadataBase: new URL("https://xacres.vercel.app"),
 
     title: {
       default: "Xacres – Discover Agricultural Land in Haryana",
@@ -49,7 +49,7 @@ export async function generateMetadata(): Promise<Metadata> {
       locale: "en_IN",
       images: [
         {
-          url: "https://xacres.com/logoFull.png", // ✅ absolute URL (IMPORTANT)
+          url: "https://xacres.vercel.app/logoFull.png", // ✅ absolute URL (IMPORTANT)
           width: 1200,
           height: 630,
         },
@@ -61,7 +61,7 @@ export async function generateMetadata(): Promise<Metadata> {
       title: "Xacres – Discover Agricultural Land in Haryana",
       description:
         "Find agricultural land in Haryana with map-based exploration.",
-      images: ["https://xacres.com/logoFull.png"], // ✅ absolute URL
+      images: ["https://xacres.vercel.app/logoFull.png"], // ✅ absolute URL
     },
 
     robots: {
