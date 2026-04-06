@@ -13,62 +13,64 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 })
 
-export const metadata: Metadata = {
-  metadataBase: new URL("https://xacres.com"),
+export async function generateMetadata(): Promise<Metadata> {
+  return {
+    metadataBase: new URL("https://xacres.com"),
 
-  title: {
-    default: "Xacres – Discover Agricultural Land in Haryana",
-    template: "%s | Xacres",
-  },
+    title: {
+      default: "Xacres – Discover Agricultural Land in Haryana",
+      template: "%s | Xacres",
+    },
 
-  description:
-    "Explore agricultural, residential, and highway land for sale in Haryana. Discover land on map, view details, and contact owners directly on Xacres.",
-
-  keywords: [
-    "land for sale Haryana",
-    "agricultural land Haryana",
-    "plots in Haryana",
-    "buy land India",
-    "land near me",
-    "farm land Haryana",
-    "Xacres",
-  ],
-
-  alternates: {
-    canonical: "/",
-  },
-
-  openGraph: {
-    title: "Xacres – Discover Agricultural Land in Haryana",
     description:
-      "Explore land listings across Haryana with map-based discovery. View details, images, and connect directly with land owners.",
-    url: "/",
-    siteName: "Xacres",
-    type: "website",
-    locale: "en_IN",
-    images: [
-      {
-        url: "/logoFull.png", // ✅ your OG image
-        width: 1200,
-        height: 630,
-      },
+      "Explore agricultural, residential, and highway land for sale in Haryana. Discover land on map, view details, and contact directly on Xacres.",
+
+    keywords: [
+      "land for sale Haryana",
+      "agricultural land Haryana",
+      "plots in Haryana",
+      "buy land India",
+      "land near me",
+      "farm land Haryana",
+      "Xacres",
     ],
-  },
 
-  twitter: {
-    card: "summary_large_image",
-    title: "Xacres – Discover Agricultural Land in Haryana",
-    description:
-      "Find agricultural land in Haryana with map-based exploration.",
-    images: ["/logoFull.png"],
-  },
+    alternates: {
+      canonical: "/",
+    },
 
-  robots: {
-    index: true,
-    follow: true,
-  },
+    openGraph: {
+      title: "Xacres – Discover Agricultural Land in Haryana",
+      description:
+        "Explore land listings across Haryana with map-based discovery. View details, images, and connect directly.",
+      url: "/",
+      siteName: "Xacres",
+      type: "website",
+      locale: "en_IN",
+      images: [
+        {
+          url: "https://xacres.com/logoFull.png", // ✅ absolute URL (IMPORTANT)
+          width: 1200,
+          height: 630,
+        },
+      ],
+    },
 
-  manifest: "/manifest.json",
+    twitter: {
+      card: "summary_large_image",
+      title: "Xacres – Discover Agricultural Land in Haryana",
+      description:
+        "Find agricultural land in Haryana with map-based exploration.",
+      images: ["https://xacres.com/logoFull.png"], // ✅ absolute URL
+    },
+
+    robots: {
+      index: true,
+      follow: true,
+    },
+
+    manifest: "/manifest.json",
+  };
 }
 
 export const viewport = {
