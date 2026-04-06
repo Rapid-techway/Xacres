@@ -194,7 +194,15 @@ function MapLayout({ isModal = false, initialPosition, parsedPolygon, setIsFullS
         center={initialPosition}
         zoom={13}
         scrollWheelZoom={isModal}
-        className="h-full w-full z-10"
+        dragging={isModal}
+        touchZoom={isModal}
+        doubleClickZoom={isModal}
+        keyboard={isModal}
+        boxZoom={isModal}
+        style={{ 
+          touchAction: isModal ? 'none' : 'auto'
+        }}
+        className={`h-full w-full z-10 ${!isModal ? '[&_.leaflet-grab]:!cursor-default [&_.leaflet-interactive]:!cursor-default' : ''}`}
         zoomControl={false}
       >
         <TileLayer
