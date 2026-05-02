@@ -1,18 +1,21 @@
-import { HeroSection } from "@/components/home/hero-xacres"
-import { HaryanaFocusSection } from "@/components/home/haryana-focus-section"
-import { HowItWorks } from "@/components/home/how-it-works"
-import { WhyXacres } from "@/components/home/why-xacres"
-import { CTASection } from "@/components/home/cta-section"
+import { LeonardoHero } from "@/components/home/leonardo-hero"
+import { HeroScrubStory } from "@/components/home/hero-scrub-story"
+import { ParallaxShowcase } from "@/components/home/parallax-showcase"
+import { FeatureGrid } from "@/components/home/feature-grid"
+import { CTABottom } from "@/components/home/cta-bottom"
 import { Footer1 } from "@/components/home/footer1"
 
 export default function Home() {
   return (
-    <main className="bg-background">
-      <HeroSection />
-      <HaryanaFocusSection />
-      <HowItWorks />
-      <WhyXacres />
-      <CTASection />
+    <main className="bg-white text-gray-900 selection:bg-blue-100 selection:text-blue-900">
+      {/* 3D Leonardo-style Hero */}
+      <LeonardoHero />
+
+      {/* These flow naturally after the hero unpins */}
+      <HeroScrubStory />
+      <ParallaxShowcase />
+      <FeatureGrid />
+      <CTABottom />
       <Footer1 />
     </main>
   )

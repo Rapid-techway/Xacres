@@ -62,7 +62,7 @@ export function Footer1() {
                                     <ul className="space-y-2 text-sm text-gray-500">
                                         <li><Link href="/" className="hover:text-white">Map View</Link></li>
                                         <li><Link href="/lands" className="hover:text-white">Lands</Link></li>
-                                        <li><Link href="#" className="hover:text-white">How It Works</Link></li>
+                                        <li><Link href="/home" className="hover:text-white">How It Works</Link></li>
                                     </ul>
                                 </div>
 
@@ -71,9 +71,8 @@ export function Footer1() {
                                 <div>
                                     <h4 className="text-sm font-semibold mb-4 text-gray-300">Legal</h4>
                                     <ul className="space-y-2 text-sm text-gray-500">
-                                        <li><Link href="#" className="hover:text-white">Privacy Policy</Link></li>
-                                        <li><Link href="#" className="hover:text-white">Terms</Link></li>
-                                        <li><Link href="#" className="hover:text-white">Cookies</Link></li>
+                                        <li><Link href="/privacy" className="hover:text-white">Privacy Policy</Link></li>
+                                        <li><Link href="/terms" className="hover:text-white">Terms</Link></li>
                                     </ul>
                                 </div>
 
