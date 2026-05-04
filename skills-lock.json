@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "skills": {
+    "ai-sdk": {
+      "source": "vercel/ai",
+      "sourceType": "github",
+      "skillPath": "skills/use-ai-sdk/SKILL.md",
+      "computedHash": "2249889eb47ef0f61c4dba4cf2afe01c1c8dd793bb4c24230347c1ab909bb7dd"
+    },
+    "text-to-speech": {
+      "source": "elevenlabs/skills",
+      "sourceType": "github",
+      "skillPath": "text-to-speech/SKILL.md",
+      "computedHash": "58648bd4ced042dc17c035505a2984ca82f1a373be68e6e083e0a317b76893a4"
+    }
+  }
+}
