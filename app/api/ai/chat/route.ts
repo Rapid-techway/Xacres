@@ -12,7 +12,7 @@ const ENDPOINT = process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT!;
 
 const model = wrapLanguageModel({
   model: google('gemini-2.5-flash'),
-  middleware: devToolsMiddleware(),
+  middleware: process.env.NODE_ENV === 'development' ? devToolsMiddleware() : [],
 });
 
 const searchAgent = new ToolLoopAgent({
