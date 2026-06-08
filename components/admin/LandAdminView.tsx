@@ -62,7 +62,9 @@ export default function LandAdminView({ data }: LandAdminViewProps) {
           area={data.area}
           type={data.type} 
           title={data.title} 
-          slug={data.slug}        />
+          slug={data.slug}
+          landId={data.id || data.$id || ""}
+        />
       </div>
 
       {/* Admin Only Section (Bottom) */}

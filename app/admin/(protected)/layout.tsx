@@ -33,8 +33,8 @@ export default function AdminProtectedLayout({
             </div>
           </header>
 
-          <main className="flex-1">
-            <div className="p-4 md:p-8 max-w-7xl mx-auto">
+          <main className="flex-1 w-full">
+            <div className="p-4 md:p-8 w-full">
               {children}
             </div>
           </main>

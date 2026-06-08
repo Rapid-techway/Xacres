@@ -2,13 +2,8 @@ import { ToolLoopAgent, tool, createAgentUIStreamResponse, type InferAgentUIMess
 import { google } from '@ai-sdk/google';
 import { devToolsMiddleware } from '@ai-sdk/devtools';
 import { z } from 'zod';
-import { databases, Query } from '@/lib/appwrite';
-
-const DATABASE_ID = process.env.NEXT_PUBLIC_APPWRITE_DATABASE_ID!;
-const COLLECTION_ID = process.env.NEXT_PUBLIC_APPWRITE_LAND_COLLECTION_ID!;
-const STORAGE_BUCKET_ID = process.env.NEXT_PUBLIC_APPWRITE_STORAGE_BUCKET_ID!;
-const PROJECT_ID = process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID!;
-const ENDPOINT = process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT!;
+import { supabase } from '@/lib/supabase';
+import { Land } from '@/lib/types';
 
 const model = wrapLanguageModel({
   model: google('gemini-2.5-flash'),
@@ -44,70 +39,65 @@ Style Guidelines:
       }),
       execute: async ({ district, maxPrice, minArea, maxArea }) => {
         try {
-          const queries = [];
+          let query = supabase.from('lands').select('*').eq('is_public', true);
+
           if (district) {
-            queries.push(Query.equal('district', district));
+            // Case-insensitive matches for district
+            query = query.ilike('district', `%${district}%`);
           }
           if (maxPrice) {
-            queries.push(Query.lessThanEqual('price', maxPrice));
+            query = query.lte('price', maxPrice);
           }
           if (minArea) {
-            queries.push(Query.greaterThanEqual('area', minArea));
+            query = query.gte('area', minArea);
           }
           if (maxArea) {
-            queries.push(Query.lessThanEqual('area', maxArea));
+            query = query.lte('area', maxArea);
           }
-          
-          queries.push(Query.limit(12));
 
-          const response = await databases.listDocuments(
-            DATABASE_ID,
-            COLLECTION_ID,
-            queries
-          );
+          const { data: dbLands, error } = await query
+            .order('created_at', { ascending: false })
+            .limit(12);
+
+          if (error) throw error;
+
+          let lands: Partial<Land>[] = [];
+          if (dbLands && dbLands.length > 0) {
+            const landIds = dbLands.map(l => l.id);
+            const { data: dbImages, error: imgError } = await supabase
+              .from('land_images')
+              .select('*')
+              .in('land_id', landIds)
+              .order('sort_order', { ascending: true });
+
+            if (imgError) throw imgError;
+
+            lands = dbLands.map(dbLand => {
+              const imagesForLand = dbImages?.filter(img => img.land_id === dbLand.id) || [];
+              const primaryUrl = imagesForLand.find(img => img.is_primary)?.url || imagesForLand[0]?.url || null;
+
+              return {
+                id: dbLand.id,
+                slug: dbLand.slug,
+                title: dbLand.title,
+                price: Number(dbLand.price),
+                area: Number(dbLand.area),
+                village: dbLand.village,
+                district: dbLand.district,
+                roadAccess: dbLand.road_access,
+                type: dbLand.type,
+                images: primaryUrl ? [{ url: primaryUrl, isPrimary: true }] : []
+              };
+            });
+          }
 
           return {
             success: true,
-            total: response.total,
-            lands: response.documents.map(doc => {
-              // Parse images field which might be a JSON string array
-              let imageList = [];
-              try {
-                imageList = typeof doc.images === 'string' ? JSON.parse(doc.images) : (doc.images || []);
-              } catch {
-                imageList = [];
-              }
-
-              let imageUrl = null;
-              if (Array.isArray(imageList) && imageList.length > 0) {
-                const firstImage = imageList[0];
-                if (typeof firstImage === 'string') {
-                  if (firstImage.startsWith('http') || firstImage.startsWith('/')) {
-                    imageUrl = firstImage;
-                  } else {
-                    imageUrl = `${ENDPOINT}/storage/buckets/${STORAGE_BUCKET_ID}/files/${firstImage}/view?project=${PROJECT_ID}`;
-                  }
-                } else if (firstImage && typeof firstImage === 'object' && 'url' in firstImage) {
-                  imageUrl = firstImage.url;
-                }
-              }
-
-              return {
-                id: doc.$id,
-                slug: doc.slug,
-                title: doc.title,
-                price: doc.price,
-                area: doc.area,
-                village: doc.village,
-                district: doc.district,
-                roadAccess: doc.roadAccess,
-                type: doc.type,
-                images: imageUrl ? [{ url: imageUrl, isPrimary: true }] : []
-              };
-            })
+            total: lands.length,
+            lands
           };
         } catch (error) {
-          console.error('Error fetching lands:', error);
+          console.error('Error fetching lands for AI Search:', error);
           return { success: false, lands: [], error: 'Failed to fetch lands' };
         }
       },

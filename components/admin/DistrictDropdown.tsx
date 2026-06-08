@@ -28,33 +28,33 @@ export default function DistrictDropdown({ value, onChange }: DistrictDropdownPr
       <DropdownMenuTrigger asChild>
         <button
           type="button"
-          className="w-full h-12 flex items-center justify-between px-5 bg-gray-50/50 border-transparent rounded-2xl focus:bg-white focus:ring-4 focus:ring-blue-50 focus:border-blue-100 transition-all font-medium text-sm outline-none"
+          className="w-full h-11 flex items-center justify-between px-4 bg-slate-50 border border-slate-200 hover:border-slate-300 rounded-xl focus:bg-white focus:ring-2 focus:ring-emerald-500/10 focus:border-emerald-600 transition-all font-semibold text-sm text-slate-800 outline-none cursor-pointer"
         >
-          <span className={value ? "text-gray-900" : "text-gray-400"}>
+          <span className={value ? "text-slate-900" : "text-slate-400 font-medium"}>
             {value || "Select District"}
           </span>
-          <ChevronDown size={16} className={`text-gray-400 transition-transform ${isOpen ? "rotate-180" : ""}`} />
+          <ChevronDown size={14} className={`text-slate-400 transition-transform duration-250 ${isOpen ? "rotate-180" : ""}`} />
         </button>
       </DropdownMenuTrigger>
 
       <DropdownMenuContent 
-        className="w-[--radix-dropdown-menu-trigger-width] p-3 bg-white border border-gray-100 rounded-3xl shadow-2xl z-[100]"
+        className="w-[--radix-dropdown-menu-trigger-width] p-2 bg-white border border-slate-200/80 rounded-2xl shadow-xl z-[100] animate-in fade-in-50 zoom-in-95 duration-150"
         align="start"
       >
-        <div className="relative mb-3">
-          <Search size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+        <div className="relative mb-2">
+          <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
           <input
             type="text"
             placeholder="Search district..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onKeyDown={(e) => e.stopPropagation()} // Prevent Radix from closing on Space/Arrows in input
-            className="w-full h-10 pl-10 pr-4 bg-gray-50 border-none rounded-xl text-sm focus:ring-2 focus:ring-blue-100 outline-none"
+            className="w-full h-9 pl-9 pr-3 bg-slate-50 border border-slate-100 rounded-lg text-xs font-semibold focus:bg-white focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/10 outline-none"
             autoFocus
           />
         </div>
         
-        <div className="max-h-60 overflow-y-auto custom-scrollbar space-y-0.5">
+        <div className="max-h-52 overflow-y-auto custom-scrollbar space-y-0.5">
           {filteredDistricts.length > 0 ? (
             filteredDistricts.map((district) => {
               const isSelected = value === district
@@ -65,22 +65,22 @@ export default function DistrictDropdown({ value, onChange }: DistrictDropdownPr
                     onChange(district)
                     setSearchQuery("")
                   }}
-                  className={`flex items-center justify-between px-4 py-2.5 rounded-xl cursor-pointer transition-all focus:bg-blue-50 focus:text-blue-600 ${
-                    isSelected ? "bg-blue-50 text-blue-600 font-bold" : "text-gray-600"
+                  className={`flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer transition-all focus:bg-emerald-50 focus:text-emerald-700 outline-none ${
+                    isSelected ? "bg-emerald-50 text-emerald-700 font-bold" : "text-slate-650 font-medium"
                   }`}
                 >
-                  <div className="flex items-center gap-3">
-                    <div className={`p-1.5 rounded-lg ${isSelected ? "bg-blue-600 text-white" : "bg-gray-100 text-gray-400"}`}>
-                      <MapPin size={12} />
+                  <div className="flex items-center gap-2.5">
+                    <div className={`p-1.5 rounded-md ${isSelected ? "bg-emerald-600 text-white" : "bg-slate-100 text-slate-400"}`}>
+                      <MapPin size={11} />
                     </div>
-                    <span className="text-sm">{district}</span>
+                    <span className="text-xs">{district}</span>
                   </div>
-                  {isSelected && <Check size={14} />}
+                  {isSelected && <Check size={12} className="text-emerald-600" />}
                 </DropdownMenuItem>
               )
             })
           ) : (
-            <div className="py-8 text-center text-xs text-gray-400 font-medium">
+            <div className="py-6 text-center text-xs text-slate-400 font-medium">
               No matching districts
             </div>
           )}

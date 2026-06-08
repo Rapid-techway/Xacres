@@ -2,7 +2,7 @@
 
 import { useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { checkAuth } from "@/lib/appwrite"
+import { checkAuth } from "@/lib/supabase"
 
 export default function AdminRoot() {
   const router = useRouter()

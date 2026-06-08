@@ -139,6 +139,38 @@ export default async function PublicLandDetailsPage({ params }: PageProps) {
     )
   }
 
+  // Generate JSON-LD Structured Data
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://xacres.vercel.app';
+  const imageUrl = data.images?.[0]?.url || `${appUrl}/logoFull.png`;
+
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'RealEstateListing',
+    'name': `${data.area} Acres ${data.type} Land in ${data.village}, ${data.district}, Haryana`,
+    'description': data.description || `${data.area} acre land for sale in ${data.village}, ${data.district}, Haryana.`,
+    'image': imageUrl,
+    'url': `${appUrl}/lands/${slug}`,
+    'offers': {
+      '@type': 'QuantitativeValue',
+      'value': data.price,
+      'unitText': 'INR'
+    },
+    'address': {
+      '@type': 'PostalAddress',
+      'addressLocality': data.village,
+      'addressRegion': data.district,
+      'addressCountry': 'IN'
+    }
+  };
+
   // ✅ Render Client Component
-  return <LandView data={data} />
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <LandView data={data} />
+    </>
+  )
 }

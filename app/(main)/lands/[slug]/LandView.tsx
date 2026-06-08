@@ -89,6 +89,7 @@ export default function LandView({ data }: LandViewProps) {
                 type={data.type}
                 title={data.title}
                 slug={data.slug}
+                landId={data.id || data.$id || ""}
               />
             </div>
           </div>

@@ -1,9 +1,8 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import Link from "next/link"
 import { useParams } from "next/navigation"
-import { ChevronRight, Loader2 } from "lucide-react"
+import { Loader2 } from "lucide-react"
 import LandForm from "@/components/admin/LandForm"
 import { landService } from "@/services/land.service"
 import { FlattenedLand } from "@/lib/types"
@@ -24,7 +23,6 @@ export default function EditLandPage() {
         ...fullData.land,
         ...fullData.admin,
         polygon: fullData.polygon?.polygon || null,
-        // Ensure id is present for LandForm logic
         id: fullData.land.$id,
         $id: fullData.land.$id
       }
@@ -53,20 +51,7 @@ export default function EditLandPage() {
   }
 
   return (
-    <div className="p-8 max-w-3xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      {/* Breadcrumb Header */}
-      <div>
-        <nav className="flex items-center text-sm font-medium text-gray-500 mb-2">
-          <Link href="/admin/lands" className="hover:text-blue-600 transition-colors">Lands</Link>
-          <ChevronRight size={14} className="mx-1 opacity-50" />
-          <Link href={`/admin/lands/${id}`} className="hover:text-blue-600 transition-colors">Property View</Link>
-          <ChevronRight size={14} className="mx-1 opacity-50" />
-          <span className="text-gray-900">Edit Mode</span>
-        </nav>
-        <h1 className="text-3xl font-bold tracking-tight text-gray-900">{data?.title}</h1>
-        <p className="text-gray-500 mt-1 font-medium">Listing ID: #{id}</p>
-      </div>
-
+    <div className="w-full animate-in fade-in slide-in-from-bottom-4 duration-700">
       <LandForm initialData={data} />
     </div>
   )

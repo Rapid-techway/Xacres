@@ -7,6 +7,7 @@ import {
   LayoutDashboard,
   Map,
   PlusSquare,
+  Inbox,
   LogOut,
 } from "lucide-react";
 
@@ -28,12 +29,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-import { logout, getCurrentUser } from "@/lib/appwrite";
+import { logout, getCurrentUser } from "@/lib/supabase";
 
 const navItems = [
   { name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
   { name: "Lands", href: "/admin/lands", icon: Map },
   { name: "Add Land", href: "/admin/lands/new", icon: PlusSquare },
+  { name: "Leads", href: "/admin/leads", icon: Inbox },
 ];
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {

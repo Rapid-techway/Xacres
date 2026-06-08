@@ -1,7 +1,6 @@
 import { create } from 'zustand';
 import { Land } from '@/lib/types';
 import { landService } from '@/services/land.service';
-import { Query } from '@/lib/appwrite';
 
 interface LandState {
   lands: Land[];
@@ -20,10 +19,10 @@ export const useLandStore = create<LandState>((set, get) => ({
 
     set({ isLoading: true, error: null });
     try {
-      const { documents } = await landService.getLands([
-        Query.equal('isPublic', true),
-        Query.limit(100) // Adjust limit as needed for "all" public lands
-      ]);
+      const { documents } = await landService.getLands({
+        isPublic: true,
+        limit: 100
+      });
       set({ lands: documents, isLoading: false });
     } catch (error) {
       console.error('Error fetching lands for store:', error);
