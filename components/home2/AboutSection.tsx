@@ -30,7 +30,7 @@ export default function AboutSection() {
   const words = text.split(' ');
 
   return (
-    <section className="w-full bg-[#f8f9fa] pb-24 px-4 md:px-6 font-sans">
+    <section className="w-full bg-[#f8f9fa] pb-24 md:px-6 font-sans">
       {/* 🖤 Premium Rounded Black Card */}
       <div className="max-w-[1380px] mx-auto bg-black border border-stone-900 rounded-[32px] p-6 md:p-12 lg:p-16 relative overflow-hidden z-10 shadow-2xl">
         
