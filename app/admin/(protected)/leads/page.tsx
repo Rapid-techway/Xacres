@@ -175,25 +175,25 @@ export default function AdminLeadsPage() {
   if (loading && leads.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center p-32 space-y-4">
-        <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-600 border-t-transparent shadow-lg shadow-blue-500/10"></div>
-        <p className="text-slate-400 font-bold uppercase tracking-widest text-xs animate-pulse">Loading leads pipeline...</p>
+        <div className="w-8 h-8 rounded-full border-2 border-blue-600 border-t-transparent animate-spin"></div>
+        <p className="text-stone-400 font-bold uppercase tracking-widest text-[10px]">Loading leads pipeline...</p>
       </div>
     )
   }
 
   return (
-    <div className="max-w-[1400px] mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="max-w-[1400px] mx-auto space-y-8">
       
       {/* Header Section */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="space-y-1">
-          <p className="text-xs font-semibold text-blue-600 tracking-widest uppercase mb-1">
+          <p className="text-[10px] font-bold text-blue-605 tracking-widest uppercase mb-1">
             CRM Inbox
           </p>
-          <h1 className="text-4xl font-extrabold tracking-tight text-slate-900">
+          <h1 className="text-4xl font-sans font-bold tracking-tight text-stone-900">
             Inquiries & Leads
           </h1>
-          <p className="text-sm text-slate-500 font-medium">
+          <p className="text-xs text-stone-500 font-medium tracking-[0.15px] mt-1">
             Review and follow up with potential buyers interested in your listings.
           </p>
         </div>
@@ -202,89 +202,81 @@ export default function AdminLeadsPage() {
           <Button 
             onClick={fetchLeads} 
             variant="outline" 
-            className="rounded-xl h-11 border-slate-200 hover:bg-slate-50 hover:text-slate-900 transition-all font-medium text-sm flex items-center gap-2"
+            className="rounded-full h-9 border-[#e7e5e4] hover:border-blue-650/40 text-stone-700 bg-white hover:bg-stone-50 hover:text-stone-900 transition-all font-semibold text-xs uppercase tracking-wider flex items-center gap-1.5 shadow-sm"
           >
-            <RefreshCw size={15} className={loading ? "animate-spin" : ""} />
+            <RefreshCw size={13} className={loading ? "animate-spin" : ""} />
             Refresh
           </Button>
         </div>
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="bg-white rounded-[24px] p-6 border border-slate-100 shadow-sm relative overflow-hidden group hover:border-blue-100 transition-all duration-300">
-          <div className="flex justify-between items-start">
-            <div className="space-y-1">
-              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Total Leads</span>
-              <p className="text-3xl font-extrabold text-slate-900">{leads.length}</p>
-            </div>
-            <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 group-hover:scale-110 transition-transform">
-              <Inbox size={20} />
-            </div>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
+        <div className="bg-white rounded-xl p-3.5 sm:p-5 border border-[#e7e5e4] shadow-sm hover:shadow-md transition-shadow duration-150 flex items-center justify-between gap-2">
+          <div className="space-y-1 sm:space-y-1.5 min-w-0">
+            <span className="text-[8.5px] sm:text-[10px] font-bold text-stone-400 uppercase tracking-widest truncate block">Total Leads</span>
+            <p className="text-xl sm:text-3xl font-sans font-bold text-stone-900 leading-none">{leads.length}</p>
+          </div>
+          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-700 shrink-0">
+            <Inbox className="size-3.5 sm:size-4.5" />
           </div>
         </div>
 
-        <div className="bg-white rounded-[24px] p-6 border border-slate-100 shadow-sm relative overflow-hidden group hover:border-emerald-100 transition-all duration-300">
-          <div className="flex justify-between items-start">
-            <div className="space-y-1">
-              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Leads Today</span>
-              <p className="text-3xl font-extrabold text-slate-900">
-                {leads.filter(l => new Date(l.created_at).toDateString() === new Date().toDateString()).length}
-              </p>
-            </div>
-            <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center text-emerald-600 group-hover:scale-110 transition-transform">
-              <Calendar size={20} />
-            </div>
+        <div className="bg-white rounded-xl p-3.5 sm:p-5 border border-[#e7e5e4] shadow-sm hover:shadow-md transition-shadow duration-150 flex items-center justify-between gap-2">
+          <div className="space-y-1 sm:space-y-1.5 min-w-0">
+            <span className="text-[8.5px] sm:text-[10px] font-bold text-stone-400 uppercase tracking-widest truncate block">Leads Today</span>
+            <p className="text-xl sm:text-3xl font-sans font-bold text-stone-900 leading-none">
+              {leads.filter(l => new Date(l.created_at).toDateString() === new Date().toDateString()).length}
+            </p>
+          </div>
+          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-stone-50 border border-stone-200 flex items-center justify-center text-stone-700 shrink-0">
+            <Calendar className="size-3.5 sm:size-4.5" />
           </div>
         </div>
 
-        <div className="bg-white rounded-[24px] p-6 border border-slate-100 shadow-sm relative overflow-hidden group hover:border-indigo-100 transition-all duration-300">
-          <div className="flex justify-between items-start">
-            <div className="space-y-1">
-              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Unique Contacts</span>
-              <p className="text-3xl font-extrabold text-slate-900">
-                {new Set(leads.map(l => l.phone)).size}
-              </p>
-            </div>
-            <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600 group-hover:scale-110 transition-transform">
-              <Phone size={20} />
-            </div>
+        <div className="bg-white rounded-xl p-3.5 sm:p-5 border border-[#e7e5e4] shadow-sm hover:shadow-md transition-shadow duration-150 flex items-center justify-between gap-2">
+          <div className="space-y-1 sm:space-y-1.5 min-w-0">
+            <span className="text-[8.5px] sm:text-[10px] font-bold text-stone-400 uppercase tracking-widest truncate block">Unique Contacts</span>
+            <p className="text-xl sm:text-3xl font-sans font-bold text-stone-900 leading-none">
+              {new Set(leads.map(l => l.phone)).size}
+            </p>
+          </div>
+          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-stone-50 border border-stone-200 flex items-center justify-center text-stone-700 shrink-0">
+            <Phone className="size-3.5 sm:size-4.5" />
           </div>
         </div>
 
-        <div className="bg-white rounded-[24px] p-6 border border-slate-100 shadow-sm relative overflow-hidden group hover:border-purple-100 transition-all duration-300">
-          <div className="flex justify-between items-start">
-            <div className="space-y-1">
-              <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Active Properties</span>
-              <p className="text-3xl font-extrabold text-slate-900">
-                {new Set(leads.filter(l => l.land_id).map(l => l.land_id)).size}
-              </p>
-            </div>
-            <div className="w-10 h-10 rounded-xl bg-purple-50 flex items-center justify-center text-purple-600 group-hover:scale-110 transition-transform">
-              <MapPin size={20} />
-            </div>
+        <div className="bg-white rounded-xl p-3.5 sm:p-5 border border-[#e7e5e4] shadow-sm hover:shadow-md transition-shadow duration-150 flex items-center justify-between gap-2">
+          <div className="space-y-1 sm:space-y-1.5 min-w-0">
+            <span className="text-[8.5px] sm:text-[10px] font-bold text-stone-400 uppercase tracking-widest truncate block">Active Properties</span>
+            <p className="text-xl sm:text-3xl font-sans font-bold text-stone-900 leading-none">
+              {new Set(leads.filter(l => l.land_id).map(l => l.land_id)).size}
+            </p>
+          </div>
+          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-stone-50 border border-stone-200 flex items-center justify-center text-stone-700 shrink-0">
+            <MapPin className="size-3.5 sm:size-4.5" />
           </div>
         </div>
       </div>
 
       {/* Main Container */}
-      <div className="bg-white rounded-[32px] border border-slate-100 shadow-sm overflow-hidden">
+      <div className="bg-white rounded-xl border border-[#e7e5e4] shadow-sm overflow-hidden">
         {/* Controls Bar */}
-        <div className="p-6 border-b border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="p-5 border-b border-[#e7e5e4] bg-[#fafafa] flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="relative w-full sm:max-w-md">
-            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
-              <Search size={16} />
+            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-400">
+              <Search size={14} />
             </span>
             <input
               type="text"
               placeholder="Search leads by name, phone, listing, district or village..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full h-11 pl-11 pr-4 bg-white border border-slate-200 focus:border-blue-500 rounded-xl text-sm font-medium transition-all shadow-sm outline-none"
+              className="w-full h-9 pl-9 pr-4 bg-white border border-[#e7e5e4] focus:border-blue-650 focus:ring-2 focus:ring-blue-500/10 rounded-full text-xs font-semibold tracking-[0.15px] outline-none transition-all shadow-sm"
             />
           </div>
           
-          <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider whitespace-nowrap">
+          <div className="text-[10px] font-bold text-stone-455 uppercase tracking-widest whitespace-nowrap">
             Showing {filteredLeads.length} of {leads.length} leads
           </div>
         </div>
@@ -292,11 +284,11 @@ export default function AdminLeadsPage() {
         {/* Content list */}
         {filteredLeads.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-24 px-4 text-center">
-            <div className="w-14 h-14 bg-slate-50 border border-slate-100 text-slate-300 rounded-2xl flex items-center justify-center mb-4">
-              <Inbox size={26} />
+            <div className="w-12 h-12 bg-stone-50 border border-[#e7e5e4] text-stone-350 rounded-full flex items-center justify-center mb-4">
+              <Inbox size={20} />
             </div>
-            <h3 className="text-lg font-bold text-slate-900 mb-1">No Leads Found</h3>
-            <p className="text-sm text-slate-500 max-w-sm font-medium">
+            <h3 className="text-lg font-sans font-semibold text-stone-900 mb-1">No Leads Found</h3>
+            <p className="text-xs text-stone-500 max-w-sm font-medium leading-relaxed">
               {searchTerm ? "No results match your search term. Try adjusting your keywords." : "No buyer inquiries have been submitted yet."}
             </p>
           </div>
@@ -304,36 +296,36 @@ export default function AdminLeadsPage() {
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="bg-slate-50/50 border-b border-slate-100">
-                  <th className="p-4 pl-6 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Contact Detail</th>
-                  <th className="p-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Target Land Listing</th>
-                  <th className="p-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Message & Notes</th>
-                  <th className="p-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Budget Preference</th>
-                  <th className="p-4 text-[11px] font-bold text-slate-400 uppercase tracking-wider">Received At</th>
-                  <th className="p-4 pr-6 text-right text-[11px] font-bold text-slate-400 uppercase tracking-wider">Actions</th>
+                <tr className="bg-[#fafafa] border-b border-[#e7e5e4]">
+                  <th className="p-4 pl-6 text-[10px] font-bold text-stone-400 uppercase tracking-widest">Contact Detail</th>
+                  <th className="p-4 text-[10px] font-bold text-stone-400 uppercase tracking-widest">Target Land Listing</th>
+                  <th className="p-4 text-[10px] font-bold text-stone-400 uppercase tracking-widest">Message & Notes</th>
+                  <th className="p-4 text-[10px] font-bold text-stone-400 uppercase tracking-widest">Budget Preference</th>
+                  <th className="p-4 text-[10px] font-bold text-stone-400 uppercase tracking-widest">Received At</th>
+                  <th className="p-4 pr-6 text-right text-[10px] font-bold text-stone-400 uppercase tracking-widest">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-y divide-[#e7e5e4]">
                 {filteredLeads.map((lead) => (
-                  <tr key={lead.id} className="hover:bg-slate-50/30 transition-colors group">
+                  <tr key={lead.id} className="hover:bg-stone-50/30 transition-colors group">
                     {/* User Profile Info */}
                     <td className="p-4 pl-6">
                       <div className="flex items-center gap-3">
-                        <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-slate-100 to-slate-200/50 border border-slate-200/30 flex items-center justify-center text-slate-600 font-bold text-xs uppercase shadow-sm">
+                        <div className="w-8 h-8 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-700 font-bold text-[10.5px] uppercase shadow-sm">
                           {lead.name.substring(0, 2)}
                         </div>
                         <div>
-                          <div className="font-semibold text-slate-900 flex items-center gap-1.5">
+                          <div className="font-semibold text-stone-900 text-sm">
                             {lead.name}
                           </div>
-                          <div className="text-xs text-slate-500 font-medium flex items-center gap-1.5 mt-0.5">
+                          <div className="text-[10px] text-stone-500 font-medium flex items-center gap-1.5 mt-0.5">
                             <span>{lead.phone}</span>
                             <button 
                               onClick={() => handleCopy(lead.phone, lead.id)}
-                              className="text-slate-400 hover:text-slate-600 transition"
+                              className="text-stone-400 hover:text-stone-600 transition"
                               title="Copy Phone Number"
                             >
-                              {copiedId === lead.id ? <Check size={11} className="text-emerald-500" /> : <Copy size={11} />}
+                              {copiedId === lead.id ? <Check size={10} className="text-emerald-500" /> : <Copy size={10} />}
                             </button>
                           </div>
                         </div>
@@ -347,18 +339,18 @@ export default function AdminLeadsPage() {
                           <Link 
                             href={`/lands/${lead.lands.slug}`}
                             target="_blank" 
-                            className="font-semibold text-slate-800 hover:text-blue-600 transition flex items-center gap-1 truncate text-sm"
+                            className="font-semibold text-stone-800 hover:text-blue-650 transition flex items-center gap-1 truncate text-xs"
                           >
                             {lead.lands.title}
-                            <ExternalLink size={12} className="text-slate-400 shrink-0" />
+                            <ExternalLink size={11} className="text-stone-400 shrink-0" />
                           </Link>
-                          <div className="text-[11px] text-slate-400 font-medium uppercase tracking-wider mt-0.5 flex items-center gap-1">
-                            <MapPin size={10} />
+                          <div className="text-[10px] text-stone-400 font-semibold uppercase tracking-widest mt-0.5 flex items-center gap-1">
+                            <MapPin size={9} />
                             {lead.lands.village}, {lead.lands.district}
                           </div>
                         </div>
                       ) : (
-                        <span className="text-xs text-slate-400 font-medium italic">Deleted Listing (ID: {lead.land_id.substring(0, 8)}...)</span>
+                        <span className="text-xs text-stone-400 font-medium italic">Deleted Listing (ID: {lead.land_id.substring(0, 8)}...)</span>
                       )}
                     </td>
 
@@ -366,50 +358,50 @@ export default function AdminLeadsPage() {
                     <td className="p-4 max-w-[280px]">
                       {lead.note ? (
                         <div className="flex gap-2">
-                          <FileText size={14} className="text-slate-400 shrink-0 mt-0.5" />
-                          <p className="text-sm text-slate-600 leading-relaxed font-medium line-clamp-3">
+                          <FileText size={13} className="text-stone-400 shrink-0 mt-0.5" />
+                          <p className="text-xs text-stone-600 leading-relaxed font-medium line-clamp-3">
                             {lead.note}
                           </p>
                         </div>
                       ) : (
-                        <span className="text-xs text-slate-300 font-medium italic">No message provided</span>
+                        <span className="text-[10px] text-stone-300 font-medium italic">No message provided</span>
                       )}
                     </td>
 
                     {/* Budget preference */}
                     <td className="p-4">
                       {lead.budget ? (
-                        <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-50 text-amber-700 rounded-xl text-xs font-semibold border border-amber-100/30">
-                          <Wallet size={12} />
+                        <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-stone-100 text-stone-700 rounded-full text-[10px] font-semibold border border-stone-200/50">
+                          <Wallet size={10} className="text-stone-500" />
                           {lead.budget}
                         </div>
                       ) : (
-                        <span className="text-xs text-slate-400 font-medium italic">Not specified</span>
+                        <span className="text-xs text-stone-400 font-medium italic">Not specified</span>
                       )}
                     </td>
 
                     {/* Created Date */}
-                    <td className="p-4 text-xs font-semibold text-slate-500 whitespace-nowrap">
+                    <td className="p-4 text-xs font-semibold text-stone-500 whitespace-nowrap">
                       {formatDate(lead.created_at)}
                     </td>
 
                     {/* Table Actions */}
                     <td className="p-4 pr-6 text-right whitespace-nowrap">
-                      <div className="flex items-center justify-end gap-2">
+                      <div className="flex items-center justify-end gap-1.5">
                         <a 
                           href={`tel:${lead.phone}`}
-                          className="w-8 h-8 rounded-lg border border-slate-200 bg-white flex items-center justify-center text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-all shadow-sm"
+                          className="w-7 h-7 rounded-full border border-[#e7e5e4] bg-white flex items-center justify-center text-stone-600 hover:bg-stone-50 hover:text-stone-900 transition-all shadow-sm"
                           title="Call Lead"
                         >
-                          <Phone size={14} />
+                          <Phone size={12} />
                         </a>
                         <button 
                           onClick={() => handleDelete(lead.id)}
                           disabled={deletingId === lead.id}
-                          className="w-8 h-8 rounded-lg border border-red-100 bg-white flex items-center justify-center text-red-500 hover:bg-red-50 hover:text-red-600 transition-all shadow-sm disabled:opacity-50"
+                          className="w-7 h-7 rounded-full border border-red-100 bg-white flex items-center justify-center text-red-500 hover:bg-red-50 hover:text-red-650 transition-all shadow-sm disabled:opacity-50"
                           title="Delete Lead"
                         >
-                          <Trash2 size={14} />
+                          <Trash2 size={12} />
                         </button>
                       </div>
                     </td>

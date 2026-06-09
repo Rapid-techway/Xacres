@@ -69,26 +69,26 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   return (
     <Sidebar
-      className="bg-slate-50 border-r border-slate-200"
+      className="bg-[#fafafa] border-r border-[#e7e5e4]"
       {...props}
     >
       {/* HEADER - Logo (exactly matching your main site style) */}
-      <SidebarHeader className="h-20 pt-4 border-b border-slate-200 px-6 flex items-center">
+      <SidebarHeader className="h-20 pt-4 border-b border-[#e7e5e4] px-6 flex items-center bg-[#fafafa]">
         <Link
           href="/admin/dashboard"
           className="flex flex-col"
         >
-          <span className="font-bold text-slate-900 text-[22px] tracking-[-0.03em]">
+          <span className="font-sans font-bold text-stone-900 text-[22px] tracking-tight">
             Xacres
           </span>
-          <span className="text-[10px] text-slate-400 font-medium -mt-0.5">
-            ADMIN DASHBOARD
+          <span className="text-[9px] text-stone-400 font-semibold tracking-widest -mt-0.5 uppercase">
+            ADMIN PANEL
           </span>
         </Link>
       </SidebarHeader>
 
       {/* MENU */}
-      <SidebarContent className="px-3 py-6">
+      <SidebarContent className="px-3 py-6 bg-[#fafafa]">
         <SidebarMenu className="gap-1.5">
           {navItems.map((item) => {
             const isActive =
@@ -108,21 +108,21 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   isActive={isActive}
                   onClick={() => setOpenMobile(false)}
                   className={`
-                    h-12 px-4 rounded-2xl transition-all duration-200
+                    h-10 px-4 rounded-full transition-all duration-150
                     ${isActive
-                      ? "bg-white text-blue-700 shadow-sm border border-slate-100"
-                      : "text-slate-600 hover:bg-white hover:text-slate-900 hover:shadow-sm"
+                      ? "bg-white text-stone-900 shadow-sm border border-[#e7e5e4]"
+                      : "text-stone-605 hover:bg-white/60 hover:text-stone-900"
                     }
                   `}
                 >
-                  <Link href={item.href} className="flex items-center gap-3.5">
+                  <Link href={item.href} className="flex items-center gap-3">
                     <item.icon
-                      className={`size-5 transition-colors ${
-                        isActive ? "text-blue-600" : "text-slate-400"
+                      className={`size-4.5 transition-colors ${
+                        isActive ? "text-blue-600" : "text-stone-400"
                       }`}
-                      strokeWidth={2.25}
+                      strokeWidth={isActive ? 2.25 : 1.75}
                     />
-                    <span className="text-[14.5px] font-medium">
+                    <span className="text-[14px] font-medium tracking-[0.15px]">
                       {item.name}
                     </span>
                   </Link>
@@ -134,19 +134,19 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarContent>
 
       {/* FOOTER - Profile */}
-      <SidebarFooter className="p-4 border-t border-slate-200 mt-auto">
+      <SidebarFooter className="p-4 border-t border-[#e7e5e4] bg-[#fafafa] mt-auto">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <SidebarMenuButton className="h-14 w-full rounded-2xl hover:bg-white active:bg-slate-100 transition-all px-3">
-              <div className="flex items-center gap-3 w-full">
-                <div className="size-9 rounded-2xl bg-gradient-to-br from-slate-700 to-slate-800 flex items-center justify-center text-white text-sm font-semibold ring-2 ring-white shadow-sm shrink-0">
+            <SidebarMenuButton className="h-12 w-full rounded-full hover:bg-white/85 active:bg-white transition-all px-3">
+              <div className="flex items-center gap-2.5 w-full">
+                <div className="size-8 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-700 text-xs font-semibold shrink-0">
                   {user?.name ? user.name.substring(0, 2).toUpperCase() : "AD"}
                 </div>
                 <div className="flex flex-col text-left min-w-0">
-                  <span className="text-sm font-semibold text-slate-900 truncate">
+                  <span className="text-xs font-semibold text-stone-900 truncate">
                     {user?.name || "Loading..."}
                   </span>
-                  <span className="text-xs text-slate-500 truncate">
+                  <span className="text-[10px] text-stone-500 truncate">
                     {user?.email || "..."}
                   </span>
                 </div>
@@ -157,11 +157,11 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <DropdownMenuContent
             align="end"
             sideOffset={8}
-            className="rounded-2xl p-1.5 border border-slate-100 shadow-xl min-w-56"
+            className="rounded-xl p-1 border border-[#e7e5e4] bg-white shadow-md min-w-52"
           >
             <DropdownMenuItem
               onClick={handleLogout}
-              className="text-red-600 hover:bg-red-50 focus:bg-red-50 rounded-xl px-3 py-2.5 cursor-pointer flex items-center gap-2.5"
+              className="text-red-600 hover:bg-red-50 focus:bg-red-50 rounded-lg px-3 py-2 cursor-pointer flex items-center gap-2 text-xs"
             >
               <LogOut className="size-4" />
               <span className="font-medium">Logout</span>

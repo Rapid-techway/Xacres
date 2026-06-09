@@ -35,7 +35,7 @@ const PriceStickyCard = forwardRef<HTMLDivElement, PriceStickyCardProps>(
           <div className="space-y-2">
             <div className="flex items-baseline gap-2">
               <span className="text-3xl font-semibold text-gray-900 tracking-tight">
-                ₹{formatPrice(price)}
+                ₹ {formatPrice(price)}
               </span>
               <span className="text-gray-400 text-sm">
                 total
@@ -65,7 +65,12 @@ const PriceStickyCard = forwardRef<HTMLDivElement, PriceStickyCardProps>(
             Contact via WhatsApp
           </button>
 
-          <hr className="border-gray-100" />
+          {/* Elegant OR divider */}
+          <div className="relative flex py-1 items-center">
+            <div className="flex-grow border-t border-gray-100"></div>
+            <span className="flex-shrink mx-4 text-[10px] font-black text-gray-400 uppercase tracking-wider">OR</span>
+            <div className="flex-grow border-t border-gray-100"></div>
+          </div>
 
           {/* Lead capture system */}
           <LeadForm landId={landId} landTitle={title} />

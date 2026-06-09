@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useCallback, useEffect } from "react"
+import { useState, useCallback, useEffect, useRef } from "react"
 import { createPortal } from "react-dom"
 import Image from "next/image"
 import { Maximize2, MoreHorizontal, X, ChevronLeft, ChevronRight } from "lucide-react"
@@ -14,6 +14,37 @@ interface ImageGridProps {
 export default function ImageGrid({ images, title }: ImageGridProps) {
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(null)
   const [isImageLoaded, setIsImageLoaded] = useState(false);
+
+  const touchStartX = useRef<number | null>(null);
+  const touchEndX = useRef<number | null>(null);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.targetTouches[0].clientX;
+    touchEndX.current = e.targetTouches[0].clientX;
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    touchEndX.current = e.targetTouches[0].clientX;
+  };
+
+  const handleTouchEnd = () => {
+    if (touchStartX.current === null || touchEndX.current === null) return;
+    
+    const diffX = touchStartX.current - touchEndX.current;
+    const minSwipeDistance = 50; // Minimum distance in px to register a swipe
+
+    if (diffX > minSwipeDistance) {
+      // Swiped left -> Next image
+      handleNext();
+    } else if (diffX < -minSwipeDistance) {
+      // Swiped right -> Previous image
+      handlePrev();
+    }
+
+    // Reset values
+    touchStartX.current = null;
+    touchEndX.current = null;
+  };
 
   const sortedImages = [...(images || [])].sort(
     (a, b) => (b.isPrimary ? 1 : 0) - (a.isPrimary ? 1 : 0)
@@ -37,7 +68,7 @@ export default function ImageGrid({ images, title }: ImageGridProps) {
       setSelectedImageIndex((prev) => (prev! - 1 + sortedImages.length) % sortedImages.length)
     }
   }, [selectedImageIndex, sortedImages.length])
-  
+
 
   // Handle keyboard navigation and body scroll
   useEffect(() => {
@@ -73,7 +104,7 @@ export default function ImageGrid({ images, title }: ImageGridProps) {
     };
 
     window.addEventListener('popstate', handlePopState);
-    
+
     return () => {
       window.removeEventListener('popstate', handlePopState);
       // Remove the dummy state if we close manually
@@ -98,7 +129,7 @@ export default function ImageGrid({ images, title }: ImageGridProps) {
   return (
     <>
       <div className="relative group rounded-xl overflow-hidden shadow-sm">
-        <div className="aspect-[16/9] md:aspect-[21/9] w-full">
+        <div className="aspect-[16/9] md:aspect-[21/9] w-full md:h-[350px]">
           <div
             className={`grid h-full w-full gap-2 
             ${displayImages.length === 1 ? "grid-cols-1" : ""}
@@ -227,7 +258,12 @@ export default function ImageGrid({ images, title }: ImageGridProps) {
 
       {/* Full Screen Modal */}
       {selectedImageIndex !== null && typeof document !== "undefined" && createPortal(
-        <div className="fixed inset-0 z-[99999] bg-black/95 backdrop-blur-sm animate-in fade-in duration-300 flex items-center justify-center">
+        <div 
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+          className="fixed inset-0 z-[99999] bg-black/95 backdrop-blur-sm animate-in fade-in duration-300 flex items-center justify-center"
+        >
           {/* Close Button */}
           <button
             onClick={(e) => {
@@ -242,11 +278,11 @@ export default function ImageGrid({ images, title }: ImageGridProps) {
 
           {/* Navigation Buttons */}
           {sortedImages.length > 1 && (
-  <>
-    {/* PREV */}
-    <button
-      onClick={handlePrev}
-      className="
+            <>
+              {/* PREV */}
+              <button
+                onClick={handlePrev}
+                className="
         absolute z-[1000]
         
         /* Mobile (bottom left) */
@@ -261,15 +297,15 @@ export default function ImageGrid({ images, title }: ImageGridProps) {
         hover:bg-white/20 transition-all active:scale-95
         group/nav
       "
-      title="Previous"
-    >
-      <ChevronLeft size={24} className="text-white/80 group-hover/nav:text-white" />
-    </button>
+                title="Previous"
+              >
+                <ChevronLeft size={24} className="text-white/80 group-hover/nav:text-white" />
+              </button>
 
-    {/* NEXT */}
-    <button
-      onClick={handleNext}
-      className="
+              {/* NEXT */}
+              <button
+                onClick={handleNext}
+                className="
         absolute z-[1000]
         
         /* Mobile (bottom right) */
@@ -284,12 +320,12 @@ export default function ImageGrid({ images, title }: ImageGridProps) {
         hover:bg-white/20 transition-all active:scale-95
         group/nav
       "
-      title="Next"
-    >
-      <ChevronRight size={24} className="text-white/80 group-hover/nav:text-white" />
-    </button>
-  </>
-)}
+                title="Next"
+              >
+                <ChevronRight size={24} className="text-white/80 group-hover/nav:text-white" />
+              </button>
+            </>
+          )}
 
           {/* Main Image View */}
           <div
@@ -304,7 +340,7 @@ export default function ImageGrid({ images, title }: ImageGridProps) {
                 src={sortedImages[selectedImageIndex].url}
                 alt={`${title} - Photo ${selectedImageIndex + 1}`}
                 fill
-                className={`transition-all duration-700 object-contain select-none ${isImageLoaded ? 'opacity-100' : 'opacity-0'}`}
+                className={`transition-all duration-700 object-scale-down select-none ${isImageLoaded ? 'opacity-100' : 'opacity-0'}`}
                 sizes="100vw"
                 quality={100}
                 priority
@@ -323,9 +359,7 @@ export default function ImageGrid({ images, title }: ImageGridProps) {
             <span>{sortedImages.length} images</span>
           </div>
 
-          {/* Mobile swipe areas as fallback since simple touch might be harder to add without libraries */}
-          <div className="absolute left-0 top-0 bottom-0 w-1/4 z-10 sm:hidden" onClick={(e) => { e.stopPropagation(); handlePrev(e); }} />
-          <div className="absolute right-0 top-0 bottom-0 w-1/4 z-10 sm:hidden" onClick={(e) => { e.stopPropagation(); handleNext(e); }} />
+          {/* Touch swipe handles all transitions on mobile/tablets */}
         </div>,
         document.body
       )}

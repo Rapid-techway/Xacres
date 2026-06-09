@@ -38,6 +38,7 @@ import DistrictDropdown from "./DistrictDropdown"
 import {
   TooltipProvider,
 } from "@/components/ui/tooltip"
+import { KMLUpload } from "./kml/KMLUpload"
 
 // Dynamically import PolygonMap to avoid SSR issues with Leaflet
 const PolygonMap = dynamic(() => import("@/components/map/PolygonMap"), {
@@ -120,6 +121,7 @@ export default function LandForm({ initialData = null }: LandFormProps) {
   })
 
   const [isDragging, setIsDragging] = useState(false)
+  const [mapVersion, setMapVersion] = useState(0)
 
   // Auto-generate slug from title
   const generateSlug = (text: string) => {
@@ -315,20 +317,20 @@ export default function LandForm({ initialData = null }: LandFormProps) {
 
   return (
     <TooltipProvider>
-      <form onSubmit={handleSave} className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-20 w-full">
+      <form onSubmit={handleSave} className="space-y-8 pb-20 w-full">
 
         {/* BREADCRUMB HEADER (Replicating exact desktop header matching image mockup) */}
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div>
-            <nav className="flex items-center text-sm font-medium text-slate-500 mb-2">
+            <nav className="flex items-center text-xs font-bold text-stone-400 uppercase tracking-widest mb-2">
               <Link href="/admin/lands" className="hover:text-blue-650 transition-colors">Lands</Link>
-              <ChevronRight size={14} className="mx-1.5 opacity-55" />
-              <span className="text-slate-900">{isEdit ? "Edit Land Listing" : "Add New Listing"}</span>
+              <ChevronRight size={12} className="mx-1 opacity-55 text-stone-450" />
+              <span className="text-stone-800 font-semibold">{isEdit ? "Edit Land Listing" : "Add New Listing"}</span>
             </nav>
-            <h1 className="text-3xl font-extrabold tracking-tight text-slate-900 leading-none">
-              {isEdit ? "Edit Land Listing" : "Create Land Listing"}
+            <h1 className="text-4xl font-sans font-bold tracking-tight text-stone-900 leading-none">
+              {isEdit ? "Edit Land" : "Create Land Listing"}
             </h1>
-            <p className="text-sm text-slate-500 mt-1.5 font-medium">
+            <p className="text-xs text-stone-500 mt-1 font-medium tracking-[0.15px]">
               Manage property details, location, pricing and admin information.
             </p>
           </div>
@@ -339,19 +341,19 @@ export default function LandForm({ initialData = null }: LandFormProps) {
               <Link
                 href={`/lands/${formData.slug}`}
                 target="_blank"
-                className="bg-white hover:bg-slate-50 text-slate-700 font-extrabold border border-slate-200 px-5 py-2.5 rounded-xl text-xs uppercase tracking-wider flex items-center gap-2 transition-all shadow-sm h-10"
+                className="bg-white hover:bg-stone-50 text-stone-700 font-semibold border border-[#e7e5e4] px-4 py-2 rounded-full text-xs uppercase tracking-wider flex items-center gap-1.5 transition-all shadow-sm h-9 hover:border-blue-650/40"
               >
-                <Eye size={14} />
-                Preview Listing
+                <Eye size={13} />
+                Preview
               </Link>
             )}
             <Button
               type="submit"
               disabled={loading}
-              className="bg-emerald-600 hover:bg-emerald-700 font-extrabold text-white shadow-md shadow-emerald-500/10 rounded-xl px-6 py-2.5 h-10 text-xs uppercase tracking-wider gap-2 transition-all active:scale-[0.97]"
+              className="bg-[#292524] hover:bg-[#0c0a09] border border-[#292524] hover:border-blue-600/30 text-white font-semibold shadow-sm rounded-full px-5 py-2 h-9 text-xs uppercase tracking-widest gap-1.5 transition-all focus:ring-2 focus:ring-blue-500/10 shrink-0"
             >
               {loading ? "Saving..." : "Save & Update"}
-              {!loading && <Check size={14} strokeWidth={2.5} />}
+              {!loading && <Check size={13} strokeWidth={2.5} />}
             </Button>
           </div>
         </div>
@@ -595,15 +597,15 @@ export default function LandForm({ initialData = null }: LandFormProps) {
         </div>
 
         {/* FULL WIDTH: Map Boundaries & Centroid */}
-        <div className="bg-white rounded-[24px] border border-slate-200/60 p-6 md:p-8 shadow-sm hover:shadow-md/20 transition-all duration-300 space-y-6 w-full animate-in fade-in duration-300">
+        <div className="bg-white rounded-xl border border-[#e7e5e4] p-6 md:p-8 shadow-sm space-y-6 w-full">
           {/* Header with Accordion Toggle for Mobile */}
           <div
             className="flex items-center justify-between border-b border-slate-100 pb-4 mb-5 cursor-pointer lg:cursor-default select-none"
             onClick={() => toggleSection('map')}
           >
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center border border-purple-100/30 shadow-sm shrink-0">
-                <MapIcon size={18} strokeWidth={2.5} />
+              <div className="w-9 h-9 rounded-full bg-blue-50 text-blue-700 flex items-center justify-center border border-blue-100/50 shrink-0">
+                <MapIcon size={16} />
               </div>
               <div>
                 <h3 className="text-xs font-black text-slate-800 uppercase tracking-widest leading-none">MAP BOUNDARIES & CENTROID</h3>
@@ -619,8 +621,9 @@ export default function LandForm({ initialData = null }: LandFormProps) {
           <div className={`grid grid-cols-1 lg:grid-cols-10 gap-6 ${sectionsExpanded.map ? 'grid' : 'hidden lg:grid'}`}>
 
             {/* Map Canvas */}
-            <div className="lg:col-span-7 h-[360px] md:h-[400px] w-full overflow-hidden rounded-[20px] border border-slate-200/80 shadow-inner relative">
+            <div className="lg:col-span-7 h-[360px] md:h-[400px] w-full overflow-hidden rounded-xl border border-[#e7e5e4] shadow-inner relative">
               <PolygonMap
+                key={`map-${mapVersion}`}
                 initialPolygon={formData.polygon as GeoJsonFeatureCollection | null}
                 onPolygonComplete={(poly: GeoJsonFeatureCollection | null, centroid: Centroid) => {
                   setFormData(prev => ({
@@ -644,7 +647,7 @@ export default function LandForm({ initialData = null }: LandFormProps) {
                     placeholder="28.70515975"
                     value={formData.latitude || ""}
                     onChange={(e) => handleChange("latitude", parseFloat(e.target.value) || 0)}
-                    className="h-11 px-4 bg-slate-50/40 border border-slate-200 hover:border-slate-300 focus:border-emerald-600 focus:bg-white focus:ring-2 focus:ring-emerald-500/10 transition-all font-mono text-xs text-slate-700 font-semibold animate-in fade-in placeholder:text-slate-400/60 placeholder:font-normal"
+                    className="h-11 px-4 bg-slate-50/40 border border-slate-200 hover:border-slate-350 focus:border-blue-600 focus:bg-white focus:ring-2 focus:ring-blue-500/10 transition-all font-mono text-xs text-slate-700 font-semibold placeholder:text-slate-400/60 placeholder:font-normal"
                   />
                 </div>
 
@@ -656,7 +659,24 @@ export default function LandForm({ initialData = null }: LandFormProps) {
                     placeholder="76.08435125"
                     value={formData.longitude || ""}
                     onChange={(e) => handleChange("longitude", parseFloat(e.target.value) || 0)}
-                    className="h-11 px-4 bg-slate-50/40 border border-slate-200 hover:border-slate-300 focus:border-emerald-600 focus:bg-white focus:ring-2 focus:ring-emerald-500/10 transition-all font-mono text-xs text-slate-700 font-semibold animate-in fade-in placeholder:text-slate-400/60 placeholder:font-normal"
+                    className="h-11 px-4 bg-slate-50/40 border border-slate-200 hover:border-slate-350 focus:border-blue-600 focus:bg-white focus:ring-2 focus:ring-blue-500/10 transition-all font-mono text-xs text-slate-700 font-semibold placeholder:text-slate-400/60 placeholder:font-normal"
+                  />
+                </div>
+
+                {/* KML Boundary Import Section */}
+                <div className="pt-2 border-t border-slate-100 mt-2">
+                  <KMLUpload
+                    onImportSuccess={(result) => {
+                      setFormData(prev => ({
+                        ...prev,
+                        polygon: result.polygon as unknown as Record<string, unknown> | null,
+                        latitude: result.centroid.lat,
+                        longitude: result.centroid.lng,
+                        area: result.acreage
+                      }));
+                      // Force map remount to draw new coordinates
+                      setMapVersion(v => v + 1);
+                    }}
                   />
                 </div>
               </div>
@@ -978,13 +998,13 @@ export default function LandForm({ initialData = null }: LandFormProps) {
         </div>
 
         {/* FOOTER ACTIONS BAR */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-slate-200/80 w-full">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-[#e7e5e4] w-full">
           <button
             type="button"
-            className="w-full sm:w-auto px-5 py-3 text-xs font-black uppercase tracking-widest text-slate-650 hover:text-slate-900 hover:bg-slate-50 bg-white border border-slate-200/80 rounded-xl transition flex items-center justify-center gap-1.5 shadow-sm active:scale-98"
+            className="w-full sm:w-auto px-5 py-2.5 text-xs font-semibold uppercase tracking-wider text-stone-700 hover:text-stone-950 hover:bg-stone-50 bg-white border border-[#e7e5e4] hover:border-blue-650/40 rounded-full transition flex items-center justify-center gap-1.5 shadow-sm h-9"
             onClick={() => router.back()}
           >
-            <ArrowLeft size={14} />
+            <ArrowLeft size={13} />
             Back to Lands
           </button>
 
@@ -993,10 +1013,10 @@ export default function LandForm({ initialData = null }: LandFormProps) {
             <Button
               type="submit"
               disabled={loading}
-              className="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 font-extrabold text-white shadow-md shadow-emerald-500/10 rounded-xl px-8 py-3 h-11 text-xs uppercase tracking-wider gap-2 transition-all active:scale-[0.97] shrink-0"
+              className="w-full sm:w-auto bg-[#292524] hover:bg-[#0c0a09] border border-[#292524] hover:border-blue-600/30 text-white font-semibold shadow-sm rounded-full px-6 py-2.5 h-9 text-xs uppercase tracking-widest gap-2 transition-all focus:ring-2 focus:ring-blue-500/10 shrink-0"
             >
               {loading ? "Processing..." : (isEdit ? "Save & Update Listing" : "Publish Listing")}
-              {!loading && <Rocket size={14} strokeWidth={2.5} />}
+              {!loading && <Rocket size={13} strokeWidth={2.0} />}
             </Button>
           </div>
         </div>

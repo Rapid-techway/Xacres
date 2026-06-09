@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import Link from 'next/link';
-import { ChevronRight, MapPin, Grid } from 'lucide-react';
+import { MapPin, Grid } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import LandCard from '@/components/common/LandCard';
 import { Land } from '@/lib/types';
@@ -130,15 +130,6 @@ export default async function DistrictLandsPage({ params }: PageProps) {
 
   return (
     <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-10 py-8 space-y-8 animate-in fade-in duration-500">
-      {/* Breadcrumbs */}
-      <nav className="flex items-center text-xs font-semibold uppercase tracking-wider text-gray-400">
-        <Link href="/" className="hover:text-blue-600 transition-colors">Home</Link>
-        <ChevronRight size={12} className="mx-2" />
-        <Link href="/lands" className="hover:text-blue-600 transition-colors">Lands</Link>
-        <ChevronRight size={12} className="mx-2" />
-        <span className="text-gray-900">{formattedDistrict} District</span>
-      </nav>
-
       {/* Directory Title / Header */}
       <div className="border-b border-gray-100 pb-6">
         <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-gray-900 flex items-center gap-3">
@@ -165,7 +156,7 @@ export default async function DistrictLandsPage({ params }: PageProps) {
           </Link>
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-6 gap-y-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-10">
           {lands.map((land) => (
             <LandCard key={land.id} land={land} />
           ))}
