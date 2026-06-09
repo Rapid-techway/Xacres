@@ -1,5 +1,8 @@
 import { Metadata } from 'next';
 import HeroLayout from '@/components/home2/HeroLayout';
+import MapSection from '@/components/home2/MapSection';
+import AboutSection from '@/components/home2/AboutSection';
+import ValuesSection from '@/components/home2/ValuesSection';
 
 export const metadata: Metadata = {
   title: 'Xacres - Direct, Verified & Hassle-free Land in Haryana',
@@ -8,8 +11,12 @@ export const metadata: Metadata = {
 
 export default function Home2Page() {
   return (
-    <main className="w-full min-h-screen">
+    <main className="w-full min-h-screen bg-black">
       <HeroLayout />
+      <MapSection />
+      <AboutSection />
+      <ValuesSection />
     </main>
   );
 }
+
