@@ -4,7 +4,7 @@ import * as React from "react"
 import { Accordion as AccordionPrimitive } from "radix-ui"
 
 import { cn } from "@/lib/utils"
-import { Plus, Minus } from "lucide-react"
+import { Plus } from "lucide-react"
 
 function Accordion({
   className,
@@ -48,8 +48,7 @@ function AccordionTrigger({
         {...props}
       >
         {children}
-        <Plus className="pointer-events-none shrink-0 w-5 h-5 text-neutral-500 group-aria-expanded/accordion-trigger:hidden" />
-        <Minus className="pointer-events-none hidden shrink-0 w-5 h-5 text-neutral-500 group-aria-expanded/accordion-trigger:inline" />
+        <Plus className="pointer-events-none shrink-0 w-5 h-5 text-neutral-500 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-data-[state=open]/accordion-trigger:rotate-45" />
       </AccordionPrimitive.Trigger>
     </AccordionPrimitive.Header>
   )

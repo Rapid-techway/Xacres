@@ -29,25 +29,52 @@ export default function AboutSection() {
   const text = "We are a team of visionary builders, strategists, and innovators dedicated to creating exceptional land discovery experiences. Our mission is to connect every piece of land with the right opportunity.";
   const words = text.split(' ');
 
+  const listContainerVariants = {
+    hidden: {},
+    visible: {
+      transition: {
+        staggerChildren: 0.12
+      }
+    }
+  };
+
+  const listItemVariants = {
+    hidden: { opacity: 0, x: -8 },
+    visible: {
+      opacity: 1,
+      x: 0,
+      transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] as const }
+    }
+  };
+
   return (
     <section className="w-full bg-[#f8f9fa] pb-24 md:px-6 font-sans">
       {/* 🖤 Premium Rounded Black Card */}
       <div className="max-w-[1380px] mx-auto bg-black border border-stone-900 rounded-[32px] p-6 md:p-12 lg:p-16 relative overflow-hidden z-10 shadow-2xl">
         
         {/* About Badge */}
-        <div className="flex justify-center mb-8">
+        <motion.div 
+          initial={{ opacity: 0, y: -10 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+          className="flex justify-center mb-8"
+        >
           <span className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-stone-900/60 border border-stone-800 rounded-full text-stone-300 font-semibold text-xs tracking-wide">
             About Xacres <span className="text-[10px] text-blue-500">✦</span>
           </span>
-        </div>
+        </motion.div>
 
         {/* Scroll Reveals Text */}
-        <div 
+        <motion.div 
           ref={containerRef} 
+          initial={{ opacity: 0, y: 15 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
           className="max-w-5xl mx-auto text-center text-[22px] sm:text-[32px] lg:text-[38px] font-sans font-semibold tracking-[-0.03em] leading-[1.3] text-stone-500 mb-16 px-4"
         >
           {words.map((word, i) => {
-            // Distribute start and end ranges smoothly across scroll progress
             const start = 0.25 + (i / words.length) * 0.45;
             const end = start + 0.05;
             return (
@@ -56,13 +83,19 @@ export default function AboutSection() {
               </Word>
             );
           })}
-        </div>
+        </motion.div>
 
         {/* Bottom Feature Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch mt-6">
           
           {/* 🌎 Left Graphic Container */}
-          <div className="lg:col-span-7 bg-[#0c0c0e] border border-stone-900 rounded-3xl overflow-hidden relative min-h-[380px] lg:min-h-[460px] flex flex-col justify-end">
+          <motion.div 
+            initial={{ opacity: 0, scale: 1.03 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+            className="lg:col-span-7 bg-[#0c0c0e] border border-stone-900 rounded-3xl overflow-hidden relative min-h-[380px] lg:min-h-[460px] flex flex-col justify-end group"
+          >
             {/* Haryana globe image background */}
             <div className="absolute inset-0 z-0">
               <Image
@@ -70,12 +103,25 @@ export default function AboutSection() {
                 alt="Haryana World Connection View"
                 fill
                 sizes="(max-w-7xl) 100vw, 50vw"
-                className="object-cover object-center select-none"
+                className="object-cover object-center select-none transition-transform duration-700 group-hover:scale-102"
                 priority
               />
               {/* Radial gradient overlay to darken borders */}
               <div className="absolute inset-0 bg-gradient-to-t from-black via-black/25 to-black/20 z-10" />
             </div>
+
+            {/* Subtle moving light sweep effect */}
+            <motion.div 
+              initial={{ x: "-150%" }}
+              animate={{ x: "150%" }}
+              transition={{
+                duration: 4,
+                repeat: Infinity,
+                repeatDelay: 5,
+                ease: "easeInOut"
+              }}
+              className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent skew-x-12 pointer-events-none z-15"
+            />
 
             {/* Explore Badge/CTA */}
             <div className="absolute bottom-6 left-6 z-20">
@@ -89,10 +135,16 @@ export default function AboutSection() {
                 </div>
               </Link>
             </div>
-          </div>
+          </motion.div>
 
           {/* 🛠️ Right Info Card */}
-          <div className="lg:col-span-5 bg-[#0c0c0e] border border-stone-900 rounded-3xl p-8 flex flex-col justify-between">
+          <motion.div 
+            initial={{ opacity: 0, y: 15 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 1, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
+            className="lg:col-span-5 bg-[#0c0c0e] border border-stone-900 rounded-3xl p-8 flex flex-col justify-between"
+          >
             {/* Header info */}
             <div>
               <div className="flex items-center justify-between pb-6 border-b border-stone-900">
@@ -117,10 +169,21 @@ export default function AboutSection() {
               <div className="w-16 h-[2px] bg-stone-800 rounded-full mt-4" />
             </div>
 
-            {/* Bullet points list */}
-            <div className="flex flex-col gap-5 mt-8">
+            {/* Bullet points list with staggered children reveal */}
+            <motion.div 
+              variants={listContainerVariants}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              className="flex flex-col gap-5 mt-8"
+            >
               {/* Item 1 */}
-              <div className="flex items-start gap-4">
+              <motion.div 
+                variants={listItemVariants}
+                whileHover={{ x: 4 }}
+                transition={{ duration: 0.2 }}
+                className="flex items-start gap-4 cursor-pointer"
+              >
                 <div className="w-10 h-10 rounded-full bg-stone-900 border border-stone-850 flex items-center justify-center text-stone-300 shrink-0">
                   {/* Verified Shield Icon */}
                   <svg className="w-4 h-4 text-stone-300" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
@@ -131,12 +194,17 @@ export default function AboutSection() {
                   <h5 className="text-sm font-bold text-white">Verified Land Listings</h5>
                   <p className="text-stone-400 text-xs mt-1">Carefully verified for authenticity.</p>
                 </div>
-              </div>
+              </motion.div>
 
               <div className="h-px bg-stone-900 w-full" />
 
               {/* Item 2 */}
-              <div className="flex items-start gap-4">
+              <motion.div 
+                variants={listItemVariants}
+                whileHover={{ x: 4 }}
+                transition={{ duration: 0.2 }}
+                className="flex items-start gap-4 cursor-pointer"
+              >
                 <div className="w-10 h-10 rounded-full bg-stone-900 border border-stone-850 flex items-center justify-center text-stone-300 shrink-0">
                   {/* Chat Message Bubble Icon */}
                   <svg className="w-4 h-4 text-stone-300" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
@@ -147,12 +215,17 @@ export default function AboutSection() {
                   <h5 className="text-sm font-bold text-white">Direct & Transparent</h5>
                   <p className="text-stone-400 text-xs mt-1">Connect directly with land owners.</p>
                 </div>
-              </div>
+              </motion.div>
 
               <div className="h-px bg-stone-900 w-full" />
 
               {/* Item 3 */}
-              <div className="flex items-start gap-4">
+              <motion.div 
+                variants={listItemVariants}
+                whileHover={{ x: 4 }}
+                transition={{ duration: 0.2 }}
+                className="flex items-start gap-4 cursor-pointer"
+              >
                 <div className="w-10 h-10 rounded-full bg-stone-900 border border-stone-850 flex items-center justify-center text-stone-300 shrink-0">
                   {/* Pin Outline Icon */}
                   <svg className="w-4 h-4 text-stone-300" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
@@ -164,11 +237,11 @@ export default function AboutSection() {
                   <h5 className="text-sm font-bold text-white">Haryana First</h5>
                   <p className="text-stone-400 text-xs mt-1">Focused on every corner of Haryana.</p>
                 </div>
-              </div>
-            </div>
+              </motion.div>
+            </motion.div>
 
-          </div>
-
+          </motion.div>
+          
         </div>
 
       </div>

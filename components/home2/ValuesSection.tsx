@@ -2,15 +2,31 @@
 
 import Image from 'next/image';
 import { Mic } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 export default function ValuesSection() {
+  const cardVariants = {
+    hidden: { opacity: 0, y: 25 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] as const }
+    }
+  };
+
   return (
     <section className="w-full bg-[#f8f9fa] pb-24 px-4 md:px-6 font-sans">
       <div className="max-w-[1380px] mx-auto">
         
         {/* 🚀 Header: Title on Left, Description on Right */}
         <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-6 mb-8 lg:mb-16">
-          <div className="max-w-2xl">
+          <motion.div 
+            initial={{ opacity: 0, y: 15 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+            className="max-w-2xl"
+          >
             {/* Category tag */}
             <div className="flex items-center gap-2 text-xs font-semibold tracking-wider text-stone-500 uppercase mb-4">
               <span className="w-[3px] h-3 bg-blue-600 rounded-full" />
@@ -22,20 +38,44 @@ export default function ValuesSection() {
               Designed for <br />
               modern land <span className="text-blue-600">discovery.</span>
             </h2>
-          </div>
+          </motion.div>
           
-          <div className="max-w-md">
+          <motion.div 
+            initial={{ opacity: 0, y: 15 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1], delay: 0.1 }}
+            className="max-w-md"
+          >
             <p className="text-stone-500 text-sm sm:text-base leading-relaxed font-medium">
               Xacres brings technology and real-world insights together to make land search simple, visual and reliable.
             </p>
-          </div>
+          </motion.div>
         </div>
 
         {/* 📦 Bento Grid Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+        <motion.div 
+          variants={{
+            hidden: {},
+            visible: {
+              transition: {
+                staggerChildren: 0.08
+              }
+            }
+          }}
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: "-100px" }}
+          className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch"
+        >
           
           {/* Card 1: Real Area Visualization (Left Tall Card) */}
-          <div className="lg:col-span-4 bg-stone-950 rounded-3xl overflow-hidden relative min-h-[380px] sm:min-h-[460px] lg:min-h-[580px] flex flex-col justify-end p-6 sm:p-8 border border-stone-200/20 shadow-md">
+          <motion.div 
+            variants={cardVariants}
+            whileHover={{ y: -6, boxShadow: "0 20px 40px rgba(0,0,0,0.1)" }}
+            transition={{ duration: 0.4 }}
+            className="lg:col-span-4 bg-stone-950 rounded-3xl overflow-hidden relative min-h-[380px] sm:min-h-[460px] lg:min-h-[580px] flex flex-col justify-end p-6 sm:p-8 border border-stone-200/20 shadow-md group cursor-pointer"
+          >
             {/* Background image */}
             <div className="absolute inset-0 z-0">
               <Image
@@ -43,7 +83,7 @@ export default function ValuesSection() {
                 alt="Real Area Visualization Aerial Sunset"
                 fill
                 sizes="(max-w-7xl) 100vw, 33vw"
-                className="object-cover object-center select-none"
+                className="object-cover object-center select-none transition-transform duration-700 group-hover:scale-[1.04]"
                 priority
               />
               {/* Overlay gradient to darken bottom for readability */}
@@ -61,10 +101,15 @@ export default function ValuesSection() {
                 See the actual area with high quality maps and real world views.
               </p>
             </div>
-          </div>
+          </motion.div>
 
           {/* Card 2: AI Assisted Search (Middle Tall Card) */}
-          <div className="lg:col-span-3 bg-[#0c0c0e] border border-stone-900 rounded-3xl p-6 sm:p-8 flex flex-col justify-between min-h-[380px] sm:min-h-[460px] lg:min-h-[580px] shadow-sm">
+          <motion.div 
+            variants={cardVariants}
+            whileHover={{ y: -6, boxShadow: "0 20px 40px rgba(0,0,0,0.15)" }}
+            transition={{ duration: 0.4 }}
+            className="lg:col-span-3 bg-[#0c0c0e] border border-stone-900 rounded-3xl p-6 sm:p-8 flex flex-col justify-between min-h-[380px] sm:min-h-[460px] lg:min-h-[580px] shadow-sm cursor-pointer"
+          >
             <div>
               {/* Soundwave wavebar logo */}
               <div className="flex items-center gap-1 mb-8">
@@ -102,13 +147,18 @@ export default function ValuesSection() {
                 <Mic size={16} strokeWidth={2.5} />
               </div>
             </div>
-          </div>
+          </motion.div>
 
           {/* Right Column Bento Box Wrapper */}
           <div className="lg:col-span-5 flex flex-col justify-between gap-6">
             
             {/* Card 3: Easy to Connect via WhatsApp (Top Horizontal Card) */}
-            <div className="bg-white border border-stone-200/35 rounded-3xl p-6 sm:p-8 shadow-sm flex flex-col justify-between min-h-[220px] lg:h-[280px]">
+            <motion.div 
+              variants={cardVariants}
+              whileHover={{ y: -6, boxShadow: "0 20px 40px rgba(0,0,0,0.06)" }}
+              transition={{ duration: 0.4 }}
+              className="bg-white border border-stone-200/35 rounded-3xl p-6 sm:p-8 shadow-sm flex flex-col justify-between min-h-[220px] lg:h-[280px] cursor-pointer"
+            >
               <div>
                 {/* Custom dark WhatsApp logo */}
                 <svg className="w-8 h-8 text-stone-900 mb-6" fill="currentColor" viewBox="0 0 24 24">
@@ -123,13 +173,18 @@ export default function ValuesSection() {
                   Connect directly with us in one tap. No middlemen.
                 </p>
               </div>
-            </div>
+            </motion.div>
 
             {/* Nested Row (2 side-by-side cards at the bottom) */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 lg:h-[280px]">
               
               {/* Card 4: Send Requests */}
-              <div className="bg-[#edf4ff] rounded-3xl p-6 sm:p-8 shadow-sm flex flex-col justify-between min-h-[190px] lg:min-h-0">
+              <motion.div 
+                variants={cardVariants}
+                whileHover={{ y: -6, boxShadow: "0 20px 40px rgba(0,0,0,0.06)" }}
+                transition={{ duration: 0.4 }}
+                className="bg-[#edf4ff] rounded-3xl p-6 sm:p-8 shadow-sm flex flex-col justify-between min-h-[190px] lg:min-h-0 cursor-pointer"
+              >
                 <div>
                   {/* Outline Chat Icon */}
                   <svg className="w-8 h-8 text-stone-900 mb-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -144,10 +199,15 @@ export default function ValuesSection() {
                     Send property requests and get notified when matching lands are available.
                   </p>
                 </div>
-              </div>
+              </motion.div>
 
               {/* Card 5: Verified Listings */}
-              <div className="bg-white border border-stone-200/35 rounded-3xl p-6 sm:p-8 shadow-sm flex flex-col justify-between min-h-[190px] lg:min-h-0">
+              <motion.div 
+                variants={cardVariants}
+                whileHover={{ y: -6, boxShadow: "0 20px 40px rgba(0,0,0,0.06)" }}
+                transition={{ duration: 0.4 }}
+                className="bg-white border border-stone-200/35 rounded-3xl p-6 sm:p-8 shadow-sm flex flex-col justify-between min-h-[190px] lg:min-h-0 cursor-pointer"
+              >
                 <div>
                   {/* Outline Shield Icon */}
                   <svg className="w-8 h-8 text-stone-900 mb-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -162,12 +222,11 @@ export default function ValuesSection() {
                     Every listing is verified for transparency and trust.
                   </p>
                 </div>
-              </div>
+              </motion.div>
             </div>
 
           </div>
-
-        </div>
+        </motion.div>
 
       </div>
     </section>
