@@ -3,7 +3,7 @@ import { HeroScrubStory } from "@/components/home/hero-scrub-story"
 import { ParallaxShowcase } from "@/components/home/parallax-showcase"
 import { FeatureGrid } from "@/components/home/feature-grid"
 import { CTABottom } from "@/components/home/cta-bottom"
-import { Footer1 } from "@/components/home/footer1"
+import { Footer1 } from "@/components/home2/footer1"
 
 export default function Home() {
   return (

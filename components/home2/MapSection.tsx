@@ -11,16 +11,17 @@ export default function MapSection() {
     <section className="relative w-full bg-[#f8f9fa] py-20 lg:py-28 overflow-hidden font-sans border-t border-slate-100">
       {/* 🌟 Radial white glow behind the map for visual depth */}
       <div className="absolute top-1/2 right-0 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-to-r from-white/0 to-white/70 rounded-full blur-3xl pointer-events-none z-0" />
-      
+
       <div className="relative max-w-7xl mx-auto px-6 lg:px-8 z-10">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
-          
+
           {/* 📝 Left Content Column */}
           <div className="lg:col-span-6 flex flex-col items-start text-left">
             {/* Pill Badge */}
-            <div className="inline-flex items-center gap-2 px-4 py-2  border border-black rounded-full text-black font-bold text-xs">
-              <span>About Us</span>
-              </div>
+            <div className="flex items-center gap-2 text-xs font-semibold tracking-wider text-stone-500 uppercase mb-4">
+              <span className="w-[3px] h-3 bg-blue-600 rounded-full" />
+              <span>What we do</span>
+            </div>
 
             {/* Heading */}
             <h2 className="text-[40px] sm:text-[52px] lg:text-[60px] font-sans font-black tracking-tight leading-[1.08] text-stone-900 mt-6">
@@ -52,7 +53,7 @@ export default function MapSection() {
               <h3 className="text-lg font-black text-stone-900 tracking-tight">
                 Top Districts In Haryana
               </h3>
-              
+
               <div className="flex flex-wrap gap-3 mt-4">
                 {districts.map((district) => (
                   <Link
@@ -73,7 +74,7 @@ export default function MapSection() {
             <div className="relative w-full max-w-[780px] aspect-square flex items-center justify-center">
               {/* Radial glow background directly behind the map */}
               <div className="absolute inset-0 bg-gradient-to-tr from-white via-white/80 to-transparent rounded-full opacity-70 blur-2xl z-0 scale-110" />
-              
+
               <div className="relative w-full h-full z-10 scale-[1.6] lg:scale-[1.35]">
                 <Image
                   src="/images/haryana-map.png"

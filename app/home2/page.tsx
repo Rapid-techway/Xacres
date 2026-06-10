@@ -1,8 +1,11 @@
 import { Metadata } from 'next';
 import HeroLayout from '@/components/home2/HeroLayout';
+import HighlightsSection from '@/components/home2/HighlightsSection';
 import MapSection from '@/components/home2/MapSection';
 import AboutSection from '@/components/home2/AboutSection';
 import ValuesSection from '@/components/home2/ValuesSection';
+import FaqSection from '@/components/home2/FaqSection';
+import { Footer1 } from '@/components/home2/footer1';
 
 export const metadata: Metadata = {
   title: 'Xacres - Direct, Verified & Hassle-free Land in Haryana',
@@ -13,10 +16,16 @@ export default function Home2Page() {
   return (
     <main className="w-full min-h-screen bg-black">
       <HeroLayout />
+      <HighlightsSection />
       <MapSection />
       <AboutSection />
       <ValuesSection />
+      <FaqSection />
+      <Footer1 />
     </main>
   );
 }
+
+
+
 

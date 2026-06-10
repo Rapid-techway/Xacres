@@ -1,4 +1,4 @@
-import { Footer1 } from "@/components/home/footer1";
+import { Footer1 } from "@/components/home2/footer1";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
@@ -7,12 +7,12 @@ export default function TermsAndConditions() {
     <main className="bg-[#05070a] selection:bg-[#7c5cfc] selection:text-white">
       <div className="relative z-20 bg-[#f4f4f5] pt-24 pb-32 rounded-b-[3rem] md:rounded-b-[5rem] shadow-[0_20px_50px_rgba(0,0,0,0.1)]">
         <div className="max-w-3xl mx-auto px-6 md:px-12">
-          
+
           <Link href="/home" className="inline-flex items-center text-[#7c5cfc] font-bold font-['Syne'] uppercase tracking-widest text-sm mb-12 hover:text-[#5b3fcf] transition-colors">
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Home
           </Link>
-          
+
           <header className="mb-20">
             <h1 className="font-['Archivo_Black'] text-5xl md:text-7xl tracking-tighter uppercase leading-[0.9] mb-6 text-[#050508]">
               Terms & <br /> <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#7c5cfc] to-[#5b3fcf]">Conditions</span>
@@ -21,9 +21,9 @@ export default function TermsAndConditions() {
               Clear rules to protect you and the platform.
             </p>
           </header>
-          
+
           <div className="space-y-16 font-['Syne'] text-lg text-gray-600 leading-relaxed font-medium">
-            
+
             <section>
               <h2 className="font-['Archivo_Black'] text-2xl text-[#050508] tracking-tight uppercase mb-4">1. Nature of the Platform</h2>
               <p>
@@ -123,7 +123,7 @@ export default function TermsAndConditions() {
           </div>
         </div>
       </div>
-      
+
       {/* Dark Footer */}
       <Footer1 />
     </main>

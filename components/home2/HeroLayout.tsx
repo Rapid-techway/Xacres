@@ -4,13 +4,13 @@ import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import {
-  Play,
   Sparkles,
   ArrowUpRight,
   MapPin,
   Menu,
   X,
-  ChevronRight
+  ChevronRight,
+  Map
 } from 'lucide-react';
 import Logo from '@/components/navbar/Logo';
 
@@ -18,7 +18,7 @@ export default function HeroLayout() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <div className="relative w-full min-h-screen overflow-hidden bg-black font-sans flex flex-col justify-between">
+    <div className="relative  w-full min-h-screen overflow-hidden bg-white font-sans flex flex-col justify-between">
       {/* 🌲 Background Image with dark left gradient overlay */}
       <div className="absolute inset-0 z-0">
         <Image
@@ -27,10 +27,10 @@ export default function HeroLayout() {
           fill
           priority
           sizes="100vw"
-          className="object-cover object-center select-none"
+          className="object-cover object-center select-none rounded-b-4xl"
         />
         {/* Left-heavy dark linear gradient to guarantee title readability */}
-        <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/40 to-black/20 md:from-black/75 md:via-black/30 md:to-transparent z-10" />
+        <div className="absolute inset-0  z-10" />
       </div>
 
       {/* 🚀 Header Navigation */}
@@ -196,39 +196,37 @@ export default function HeroLayout() {
             >
               Clarity.
             </span>
-            <span className="block text-blue-600 relative mt-1">
+            <span className="block text-white relative mt-1">
               Haryana.
               <span className="absolute -bottom-3 left-0 w-24 h-[5px] bg-blue-600 rounded-full shadow-[0_0_12px_rgba(37,99,235,0.6)]" />
             </span>
           </h1>
 
-          <p className="text-stone-300 text-sm sm:text-base font-semibold tracking-[0.2px] mt-10 max-w-md leading-relaxed uppercase opacity-90">
+          <p className="text-black text-sm sm:text-base font-bold tracking-[0.2px] mt-10 max-w-md leading-relaxed opacity-90">
             Genuine land opportunities. <br />
             Direct. Verified. Hassle-free.
           </p>
 
           {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-6 mt-8 w-full sm:w-auto">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mt-8 w-full sm:w-auto">
             {/* Primary CTA */}
             <Link
               href="/lands"
-              className="w-full sm:w-auto bg-gradient-to-r from-blue-700 to-blue-500 hover:from-blue-800 hover:to-blue-600 text-white font-bold pl-7 pr-3 py-2.5 rounded-full transition-all flex items-center justify-between gap-4 shadow-lg shadow-blue-900/30 active:scale-[0.98] cursor-pointer"
+              className="w-full sm:w-auto bg-white text-black font-bold pl-7 pr-3 py-2.5 rounded-full transition-all flex items-center justify-between gap-4 shadow-lg shadow-blue-900/30 active:scale-[0.98] cursor-pointer"
             >
               <span className="text-[13px] tracking-wider uppercase">Explore Lands</span>
-              <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-blue-600 shrink-0">
+              <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white shrink-0">
                 <ArrowUpRight size={16} strokeWidth={2.5} />
               </div>
             </Link>
 
-            {/* Secondary Play Button */}
+            {/* Secondary CTA: View Map */}
             <Link
-              href="#"
-              className="group flex items-center gap-3.5 hover:text-white text-stone-300 transition-colors py-2"
+              href="/map"
+              className="w-auto bg-white/10 hover:bg-black/45 text-white border border-white/10 backdrop-blur font-semibold px-6 py-3.5 rounded-full transition-all flex items-center justify-center gap-3 active:scale-[0.98] shadow-lg cursor-pointer"
             >
-              <div className="w-10 h-10 rounded-full border border-white/20 group-hover:border-white/50 bg-white/5 flex items-center justify-center text-white transition-all group-hover:scale-105 shrink-0">
-                <Play size={14} fill="currentColor" className="translate-x-[1px]" />
-              </div>
-              <span className="text-xs font-black tracking-widest uppercase">See How It Works</span>
+              <Map size={18} className="text-white" />
+              <span className="text-[14px] font-semibold text-white">View Map</span>
             </Link>
           </div>
         </div>
