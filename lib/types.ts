@@ -21,14 +21,18 @@ export interface Land {
   isPublic: boolean;
   createdAt?: string;
   updatedAt?: string;
+  brokerId?: string | null;
+  tehsil?: string | null;
+  listingNumber?: number | null;
 }
 
 export interface LandAdmin {
   $id?: string;
   id?: string;
   landId: string;
-  ownerName: string;
-  ownerPhone: string;
+  contactType: 'OWNER' | 'BROKER';
+  ownerName?: string | null;
+  ownerPhone?: string | null;
   expectedPrice: number;
   minimumPrice: number;
   negotiable: boolean;
@@ -45,13 +49,36 @@ export interface LandPolygon {
 }
 
 export interface FlattenedLand extends Land {
-  ownerName?: string;
-  ownerPhone?: string;
+  contactType?: 'OWNER' | 'BROKER';
+  ownerName?: string | null;
+  ownerPhone?: string | null;
   expectedPrice?: number;
   minimumPrice?: number;
   negotiable?: boolean;
   adminNotes?: string;
   polygon?: Record<string, unknown> | null;
+  broker?: Broker;
+}
+
+export interface Broker {
+  id?: string;
+  $id?: string;
+  brokerCode: string;
+  name: string;
+  officeName?: string;
+  mobileNumber: string;
+  alternateMobileNumber?: string;
+  district: string;
+  tehsil: string;
+  address?: string;
+  googleLocationUrl?: string;
+  experienceYears: number;
+  referredBy?: string;
+  reputation: 'SILVER' | 'GOLD' | 'DIAMOND';
+  description?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  totalLands?: number;
 }
 
 export interface CreateFullLandPayload {

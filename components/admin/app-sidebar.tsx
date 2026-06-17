@@ -9,6 +9,7 @@ import {
   PlusSquare,
   Inbox,
   LogOut,
+  Users,
 } from "lucide-react";
 
 import {
@@ -35,6 +36,7 @@ const navItems = [
   { name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
   { name: "Lands", href: "/admin/lands", icon: Map },
   { name: "Add Land", href: "/admin/lands/new", icon: PlusSquare },
+  { name: "Brokers", href: "/admin/brokers", icon: Users },
   { name: "Leads", href: "/admin/leads", icon: Inbox },
 ];
 

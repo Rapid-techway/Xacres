@@ -118,7 +118,9 @@ export default function LandAdminView({ data }: LandAdminViewProps) {
               <User size={13} className="text-stone-400" />
               <p className="text-[9px] font-bold text-stone-400 uppercase tracking-widest">Owner</p>
             </div>
-            <p className="text-sm font-semibold text-stone-900 truncate">{data.ownerName || "N/A"}</p>
+            <p className="text-sm font-semibold text-stone-900 truncate">
+              {data.contactType === 'BROKER' ? 'Broker Managed' : (data.ownerName || "N/A")}
+            </p>
           </div>
 
           {/* Expected Price */}
@@ -152,11 +154,43 @@ export default function LandAdminView({ data }: LandAdminViewProps) {
           <div className="bg-white p-4 rounded-xl border border-[#e7e5e4] shadow-sm col-span-2 sm:col-span-1">
             <div className="flex items-center gap-2 mb-1.5">
               <Phone size={13} className="text-blue-500" />
-              <p className="text-[9px] font-bold text-blue-600 uppercase tracking-widest">Contact</p>
+              <p className="text-[9px] font-bold text-blue-650 uppercase tracking-widest">Contact</p>
             </div>
-            <p className="text-sm font-semibold text-stone-900 truncate">{data.ownerPhone || "N/A"}</p>
+            <p className="text-sm font-semibold text-stone-900 truncate">
+              {data.contactType === 'BROKER' ? (data.broker?.mobileNumber || "N/A") : (data.ownerPhone || "N/A")}
+            </p>
           </div>
         </div>
+
+        {/* Linked Broker Profile */}
+        {data.broker && (
+          <div className="bg-white rounded-xl border border-stone-200 p-5 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-750 font-black text-sm shrink-0">
+                {data.broker.name.split(' ').map(p => p[0]).join('').substring(0, 2).toUpperCase()}
+              </div>
+              <div>
+                <p className="text-[9px] font-bold text-blue-650 uppercase tracking-widest mb-0.5">Assigned Partner Broker</p>
+                <h4 className="text-sm font-semibold text-stone-900 leading-tight hover:text-blue-650 transition-colors">
+                  <Link href={`/admin/brokers/${data.broker.id}`}>
+                    {data.broker.name}
+                  </Link>
+                </h4>
+                <p className="text-[10px] text-stone-500 mt-1 font-mono">
+                  Code: {data.broker.brokerCode} &bull; {data.broker.district}, {data.broker.tehsil}
+                </p>
+              </div>
+            </div>
+
+            <div className="sm:text-right text-xs">
+              <p className="text-[9px] font-bold text-stone-400 uppercase tracking-widest mb-0.5">Contact Number</p>
+              <p className="font-semibold text-stone-850 flex items-center sm:justify-end gap-1.5">
+                <Phone size={12} className="text-stone-450" />
+                {data.broker.mobileNumber}
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Admin Notes Section */}
         <div className="relative overflow-hidden bg-white rounded-xl border border-[#e7e5e4] p-5 shadow-sm">

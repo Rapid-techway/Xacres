@@ -17,6 +17,9 @@ interface DbLand {
   is_public: boolean;
   created_at: string;
   updated_at: string;
+  broker_id?: string | null;
+  tehsil?: string | null;
+  listing_number?: number;
 }
 
 interface DbImage {
@@ -28,8 +31,9 @@ interface DbImage {
 interface DbAdmin {
   id?: string;
   land_id?: string;
-  owner_name?: string;
-  owner_phone?: string;
+  contact_type?: string;
+  owner_name?: string | null;
+  owner_phone?: string | null;
   expected_price?: number;
   minimum_price?: number;
   negotiable?: boolean;
@@ -51,7 +55,7 @@ function mapDbLandToFrontend(
 ): FlattenedLand {
   return {
     id: dbLand.id,
-    $id: dbLand.id, // Support Appwrite compatibility
+    $id: dbLand.id,
     title: dbLand.title,
     slug: dbLand.slug,
     price: Number(dbLand.price),
@@ -66,11 +70,15 @@ function mapDbLandToFrontend(
     isPublic: dbLand.is_public,
     createdAt: dbLand.created_at,
     updatedAt: dbLand.updated_at,
+    brokerId: dbLand.broker_id || null,
+    tehsil: dbLand.tehsil || null,
+    listingNumber: dbLand.listing_number ? Number(dbLand.listing_number) : null,
     images: images.map(img => ({
       url: img.url,
       isPrimary: !!(img.is_primary ?? img.isPrimary)
     })),
     // Private Admin fields (if loaded)
+    contactType: (adminData?.contact_type || 'OWNER') as 'OWNER' | 'BROKER',
     ownerName: adminData?.owner_name || '',
     ownerPhone: adminData?.owner_phone || '',
     expectedPrice: adminData ? Number(adminData.expected_price) : undefined,
@@ -88,31 +96,61 @@ export const landService = {
    */
   async createLand(data: Omit<Land, 'id' | 'createdAt' | 'updatedAt'>) {
     try {
+      const tempSlug = `temp-slug-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+
       const { data: inserted, error } = await supabase
         .from('lands')
         .insert({
-          title: data.title,
-          slug: data.slug,
+          title: data.title || 'Draft Land Listing',
+          slug: tempSlug,
           price: data.price,
           area: data.area,
           district: data.district,
+          tehsil: data.tehsil || null,
           village: data.village,
           latitude: data.latitude,
           longitude: data.longitude,
           type: data.type,
           road_access: data.roadAccess,
           description: data.description,
-          is_public: data.isPublic
+          is_public: data.isPublic,
+          broker_id: data.brokerId || null
         })
         .select()
         .single();
 
       if (error) throw error;
 
+      const listingNum = inserted.listing_number;
+      
+      // If slug has placeholder or is empty, we reconstruct the final slug
+      const areaStr = String(data.area || 0);
+      const cleanStr = (s: string) => (s || '').toLowerCase().trim().replace(/[^a-z0-9\s-]/g, '').replace(/[\s_-]+/g, '-').replace(/^-+|-+$/g, '');
+      const cleanVillage = cleanStr(data.village) || 'village';
+      const cleanTehsil = cleanStr(data.tehsil || 'tehsil') || 'tehsil';
+      const cleanDistrict = cleanStr(data.district) || 'district';
+      const finalSlug = `${areaStr}-acre-land-in-${cleanVillage}-${cleanTehsil}-${cleanDistrict}-haryana-${listingNum}`;
+
+      const finalTitle = data.title && data.title !== 'Draft Land Listing' && data.title.trim() !== ''
+        ? data.title
+        : `${data.area} Acre Land in ${data.village}, ${data.tehsil || 'Tehsil'}, ${data.district}`;
+
+      const { data: updated, error: updateError } = await supabase
+        .from('lands')
+        .update({
+          title: finalTitle,
+          slug: finalSlug
+        })
+        .eq('id', inserted.id)
+        .select()
+        .single();
+
+      if (updateError) throw updateError;
+
       // Handle direct image insertion if images are included in main creation payload
       if (data.images && data.images.length > 0) {
         const imageInserts = data.images.map((img, idx) => ({
-          land_id: inserted.id,
+          land_id: updated.id,
           url: img.url,
           is_primary: img.isPrimary,
           sort_order: idx
@@ -121,7 +159,7 @@ export const landService = {
         if (imgError) throw imgError;
       }
 
-      return mapDbLandToFrontend(inserted, data.images || []) as unknown as Land;
+      return mapDbLandToFrontend(updated, data.images || []) as unknown as Land;
     } catch (error) {
       console.error('Error creating land:', error);
       throw error;
@@ -137,8 +175,9 @@ export const landService = {
         .from('lands_admin')
         .insert({
           land_id: data.landId,
-          owner_name: data.ownerName,
-          owner_phone: data.ownerPhone,
+          contact_type: data.contactType || 'OWNER',
+          owner_name: data.contactType === 'OWNER' ? data.ownerName : null,
+          owner_phone: data.contactType === 'OWNER' ? data.ownerPhone : null,
           expected_price: data.expectedPrice,
           minimum_price: data.minimumPrice,
           negotiable: data.negotiable,
@@ -153,8 +192,9 @@ export const landService = {
         id: inserted.id,
         $id: inserted.id,
         landId: inserted.land_id,
-        ownerName: inserted.owner_name,
-        ownerPhone: inserted.owner_phone,
+        contactType: (inserted.contact_type || 'OWNER') as 'OWNER' | 'BROKER',
+        ownerName: inserted.owner_name || '',
+        ownerPhone: inserted.owner_phone || '',
         expectedPrice: Number(inserted.expected_price),
         minimumPrice: Number(inserted.minimum_price),
         negotiable: inserted.negotiable,
@@ -201,6 +241,9 @@ export const landService = {
    */
   async updateLand(id: string, data: Partial<Omit<Land, 'id' | 'createdAt' | 'updatedAt'>>) {
     try {
+      if (!id || id === 'undefined' || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) {
+        throw new Error(`Invalid land ID format (UUID expected): ${id}`);
+      }
       const payload: Record<string, unknown> = {};
       if (data.title !== undefined) payload.title = data.title;
       if (data.slug !== undefined) payload.slug = data.slug;
@@ -214,6 +257,8 @@ export const landService = {
       if (data.roadAccess !== undefined) payload.road_access = data.roadAccess;
       if (data.description !== undefined) payload.description = data.description;
       if (data.isPublic !== undefined) payload.is_public = data.isPublic;
+      if (data.brokerId !== undefined) payload.broker_id = data.brokerId;
+      if (data.tehsil !== undefined) payload.tehsil = data.tehsil;
 
       const { data: updated, error } = await supabase
         .from('lands')
@@ -250,8 +295,19 @@ export const landService = {
   async updateLandAdmin(id: string, data: Partial<Omit<LandAdmin, 'id' | 'landId' | 'createdAt' | 'updatedAt'>>) {
     try {
       const payload: Record<string, unknown> = {};
-      if (data.ownerName !== undefined) payload.owner_name = data.ownerName;
-      if (data.ownerPhone !== undefined) payload.owner_phone = data.ownerPhone;
+      if (data.contactType !== undefined) {
+        payload.contact_type = data.contactType;
+        if (data.contactType === 'BROKER') {
+          payload.owner_name = null;
+          payload.owner_phone = null;
+        } else {
+          if (data.ownerName !== undefined) payload.owner_name = data.ownerName;
+          if (data.ownerPhone !== undefined) payload.owner_phone = data.ownerPhone;
+        }
+      } else {
+        if (data.ownerName !== undefined) payload.owner_name = data.ownerName;
+        if (data.ownerPhone !== undefined) payload.owner_phone = data.ownerPhone;
+      }
       if (data.expectedPrice !== undefined) payload.expected_price = data.expectedPrice;
       if (data.minimumPrice !== undefined) payload.minimum_price = data.minimumPrice;
       if (data.negotiable !== undefined) payload.negotiable = data.negotiable;
@@ -273,8 +329,9 @@ export const landService = {
         id: updated.id,
         $id: updated.id,
         landId: updated.land_id,
-        ownerName: updated.owner_name,
-        ownerPhone: updated.owner_phone,
+        contactType: (updated.contact_type || 'OWNER') as 'OWNER' | 'BROKER',
+        ownerName: updated.owner_name || '',
+        ownerPhone: updated.owner_phone || '',
         expectedPrice: Number(updated.expected_price),
         minimumPrice: Number(updated.minimum_price),
         negotiable: updated.negotiable,
@@ -522,6 +579,9 @@ export const landService = {
    */
   async getFullLandById(landId: string) {
     try {
+      if (!landId || landId === 'undefined' || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(landId)) {
+        throw new Error(`Invalid land ID format (UUID expected): ${landId}`);
+      }
       const { data: land, error: landError } = await supabase
         .from('lands')
         .select('*')
@@ -544,8 +604,9 @@ export const landService = {
           id: adminRes.data.id,
           $id: adminRes.data.id,
           landId: adminRes.data.land_id,
-          ownerName: adminRes.data.owner_name,
-          ownerPhone: adminRes.data.owner_phone,
+          contactType: (adminRes.data.contact_type || 'OWNER') as 'OWNER' | 'BROKER',
+          ownerName: adminRes.data.owner_name || '',
+          ownerPhone: adminRes.data.owner_phone || '',
           expectedPrice: Number(adminRes.data.expected_price),
           minimumPrice: Number(adminRes.data.minimum_price),
           negotiable: adminRes.data.negotiable,
@@ -617,11 +678,15 @@ export const landService = {
    */
   async getLandBySlug(slug: string) {
     try {
-      const { data: land, error } = await supabase
-        .from('lands')
-        .select('*')
-        .eq('slug', slug)
-        .maybeSingle();
+      let query = supabase.from('lands').select('*');
+      const isNumeric = /^\d+$/.test(slug);
+      if (isNumeric) {
+        query = query.eq('listing_number', parseInt(slug, 10));
+      } else {
+        query = query.eq('slug', slug);
+      }
+      
+      const { data: land, error } = await query.maybeSingle();
 
       if (error) throw error;
       if (!land) return null;
@@ -644,6 +709,9 @@ export const landService = {
    */
   async getLandPolygonByLandId(landId: string) {
     try {
+      if (!landId || landId === 'undefined' || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(landId)) {
+        throw new Error(`Invalid land ID format (UUID expected): ${landId}`);
+      }
       const { data: polygonDoc, error } = await supabase
         .from('lands_polygon')
         .select('*')

@@ -52,7 +52,7 @@ const faqs = [
 
 export default function FaqSection() {
   return (
-    <section className="w-full bg-white py-16 md:py-24 font-sans">
+    <section className="w-full rounded-b-3xl bg-white py-16 md:py-24 font-sans">
       <div className="max-w-7xl mx-auto px-6 md:px-20">
         
         {/* Header Block */}

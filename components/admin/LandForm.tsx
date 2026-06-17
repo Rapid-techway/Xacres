@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Image from "next/image"
 import Link from "next/link"
@@ -26,19 +26,35 @@ import {
   ChevronUp,
   Globe,
   Lock,
+  Unlock,
   Eye,
   ArrowLeft,
   Info,
   Phone,
-  ChevronRight
+  ChevronRight,
+  Search
 } from "lucide-react"
 import { landService } from "@/services/land.service"
-import { CreateFullLandPayload, LandImage, Centroid, GeoJsonFeatureCollection, FlattenedLand } from "@/lib/types"
+import { brokerService } from "@/services/broker.service"
+import { CreateFullLandPayload, LandImage, Centroid, GeoJsonFeatureCollection, FlattenedLand, Broker } from "@/lib/types"
 import DistrictDropdown from "./DistrictDropdown"
+import { HARYANA_TEHSILS, HARYANA_TEHSIL_VILLAGES } from "@/lib/static"
 import {
+  Tooltip,
+  TooltipContent,
   TooltipProvider,
+  TooltipTrigger,
 } from "@/components/ui/tooltip"
+import {
+  Sheet,
+  SheetTrigger,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+} from "@/components/ui/sheet"
 import { KMLUpload } from "./kml/KMLUpload"
+import CopyAiPromptButton from "./CopyAiPromptButton"
 
 // Dynamically import PolygonMap to avoid SSR issues with Leaflet
 const PolygonMap = dynamic(() => import("@/components/map/PolygonMap"), {
@@ -65,12 +81,15 @@ interface FullFormData {
   description: string;
   isPublic: boolean;
   polygon: Record<string, unknown> | null;
+  contactType: 'OWNER' | 'BROKER';
   ownerName: string;
   ownerPhone: string;
   expectedPrice: number;
   minimumPrice: number;
   negotiable: boolean;
   adminNotes: string;
+  brokerId: string;
+  tehsil: string;
 }
 
 export default function LandForm({ initialData = null }: LandFormProps) {
@@ -79,6 +98,88 @@ export default function LandForm({ initialData = null }: LandFormProps) {
   const [loading, setLoading] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [copiedId, setCopiedId] = useState(false)
+  const [toastMessage, setToastMessage] = useState<string | null>(null)
+  const [areaUnit, setAreaUnit] = useState<'acre' | 'sqyard'>('acre')
+  const [areaInputVal, setAreaInputVal] = useState<string>("")
+  const [brokers, setBrokers] = useState<Broker[]>([])
+  const [isSheetOpen, setIsSheetOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState("")
+
+  // Find tehsil based on initial village
+  const getInitialTehsil = () => {
+    if (initialData?.tehsil) return initialData.tehsil
+    if (!initialData?.village) return ""
+    const villageName = initialData.village
+    const found = Object.keys(HARYANA_TEHSIL_VILLAGES).find(tehsil => 
+      HARYANA_TEHSIL_VILLAGES[tehsil].includes(villageName)
+    )
+    return found || ""
+  }
+
+  const [selectedTehsil, setSelectedTehsil] = useState<string>(getInitialTehsil)
+
+  // Title generation helper
+  const getGeneratedTitle = (area: number, village: string, tehsil: string, district: string) => {
+    const areaVal = area || 0;
+    const vilVal = village?.trim() || "[Village]";
+    const tehVal = tehsil?.trim() || "[Tehsil]";
+    const distVal = district?.trim() || "[District]";
+    return `${areaVal} Acre Land in ${vilVal}, ${tehVal}, ${distVal}`;
+  }
+
+  // Slug generation helper
+  const getGeneratedSlug = (area: number, village: string, tehsil: string, district: string, listingNum: string | number) => {
+    const areaStr = String(area || 0);
+    const cleanStr = (s: string) => (s || '').toLowerCase().trim().replace(/[^a-z0-9\s-]/g, '').replace(/[\s_-]+/g, '-').replace(/^-+|-+$/g, '');
+    const vilStr = cleanStr(village) || 'village';
+    const tehStr = cleanStr(tehsil) || 'tehsil';
+    const distStr = cleanStr(district) || 'district';
+    return `${areaStr}-acre-land-in-${vilStr}-${tehStr}-${distStr}-haryana-${listingNum}`;
+  }
+
+  // Check if title is custom on edit load
+  const isTitleCustomOnInit = () => {
+    if (!initialData) return false;
+    const defaultTitle = getGeneratedTitle(
+      initialData.area || 0,
+      initialData.village || "",
+      initialData.tehsil || "",
+      initialData.district || ""
+    );
+    return initialData.title !== defaultTitle;
+  }
+
+  const [customizeTitle, setCustomizeTitle] = useState(isTitleCustomOnInit())
+
+  const showToast = (message: string) => {
+    setToastMessage(message)
+    setTimeout(() => {
+      setToastMessage(current => current === message ? null : current)
+    }, 3000)
+  }
+
+  const getLandDataForAiPrompt = () => {
+    const data: Record<string, unknown> = {}
+    if (formData.area && formData.area > 0) {
+      data.area = formData.area
+    }
+    if (formData.type && formData.type.trim() !== '') {
+      data.landType = formData.type
+    }
+    if (formData.district && formData.district.trim() !== '' && formData.district !== 'district') {
+      data.district = formData.district
+    }
+    if (formData.tehsil && formData.tehsil.trim() !== '' && formData.tehsil !== 'tehsil') {
+      data.tehsil = formData.tehsil
+    }
+    if (formData.village && formData.village.trim() !== '' && formData.village !== 'village') {
+      data.village = formData.village
+    }
+    if (formData.roadAccess !== undefined) {
+      data.roadAccess = formData.roadAccess
+    }
+    return data
+  }
 
   // Mobile Accordion state toggles
   const [sectionsExpanded, setSectionsExpanded] = useState({
@@ -98,6 +199,7 @@ export default function LandForm({ initialData = null }: LandFormProps) {
     price: initialData?.price || 0,
     area: initialData?.area || 0,
     district: initialData?.district || "",
+    tehsil: initialData?.tehsil || getInitialTehsil() || "",
     village: initialData?.village || "",
     latitude: initialData?.latitude || 0,
     longitude: initialData?.longitude || 0,
@@ -110,8 +212,10 @@ export default function LandForm({ initialData = null }: LandFormProps) {
     description: initialData?.description || "",
     isPublic: initialData?.isPublic ?? true,
     polygon: initialData?.polygon || null,
+    brokerId: initialData?.brokerId || "",
 
     // Private Admin Table
+    contactType: initialData?.contactType || (initialData?.brokerId ? "BROKER" : "OWNER"),
     ownerName: initialData?.ownerName || "",
     ownerPhone: initialData?.ownerPhone || "",
     expectedPrice: initialData?.expectedPrice || initialData?.price || 0,
@@ -120,26 +224,76 @@ export default function LandForm({ initialData = null }: LandFormProps) {
     adminNotes: initialData?.adminNotes || ""
   })
 
+  const availableTehsils = formData.district ? HARYANA_TEHSILS[formData.district] || [] : []
+  const availableVillages = selectedTehsil ? HARYANA_TEHSIL_VILLAGES[selectedTehsil] || [] : []
+
+  // Load brokers on mount
+  useEffect(() => {
+    const fetchBrokers = async () => {
+      try {
+        const res = await brokerService.getBrokers({ limit: 1000 })
+        setBrokers(res.documents)
+      } catch (err) {
+        console.error("Failed to load brokers for selection:", err)
+      }
+    }
+    fetchBrokers()
+  }, [])
+
   const [isDragging, setIsDragging] = useState(false)
   const [mapVersion, setMapVersion] = useState(0)
 
-  // Auto-generate slug from title
-  const generateSlug = (text: string) => {
-    return text
-      .toLowerCase()
-      .trim()
-      .replace(/[^\w\s-]/g, '')
-      .replace(/[\s_-]+/g, '-')
-      .replace(/^-+|-+$/g, '');
-  }
+  // Sync title and slug dynamically
+  useEffect(() => {
+    const listingNum = initialData?.listingNumber || "[listing_number]"
+    const generatedSlug = getGeneratedSlug(
+      formData.area,
+      formData.village,
+      selectedTehsil,
+      formData.district,
+      listingNum
+    )
 
-  const handleTitleChange = (val: string) => {
-    setFormData(prev => ({
-      ...prev,
-      title: val,
-      slug: generateSlug(val) // Sync slug with title
-    }))
-  }
+    if (!customizeTitle) {
+      const generatedTitle = getGeneratedTitle(
+        formData.area,
+        formData.village,
+        selectedTehsil,
+        formData.district
+      )
+      setFormData(prev => ({
+        ...prev,
+        title: generatedTitle,
+        slug: generatedSlug
+      }))
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        slug: generatedSlug
+      }))
+    }
+  }, [formData.area, formData.village, selectedTehsil, formData.district, customizeTitle, initialData?.listingNumber])
+
+  // Sync external changes of formData.area back to local display input
+  useEffect(() => {
+    if (formData.area === 0) {
+      if (areaInputVal !== "") setAreaInputVal("");
+      return;
+    }
+
+    const currentVal = parseFloat(areaInputVal) || 0;
+    if (areaUnit === 'acre') {
+      if (Math.abs(currentVal - formData.area) > 0.0001) {
+        setAreaInputVal(String(formData.area));
+      }
+    } else {
+      const expectedSqYards = formData.area * 4840;
+      if (Math.abs(currentVal - expectedSqYards) > 0.1) {
+        setAreaInputVal(String(parseFloat(expectedSqYards.toFixed(2))));
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formData.area, areaUnit])
 
   const handleChange = (field: keyof FullFormData, value: string | number | boolean | LandImage[] | Record<string, unknown> | null) => {
     setFormData(prev => ({ ...prev, [field]: value }))
@@ -243,6 +397,10 @@ export default function LandForm({ initialData = null }: LandFormProps) {
       alert("Haryana District is required.");
       return;
     }
+    if (!formData.tehsil.trim()) {
+      alert("Tehsil is required.");
+      return;
+    }
     if (!formData.village.trim()) {
       alert("Village / Locality is required.");
       return;
@@ -251,13 +409,20 @@ export default function LandForm({ initialData = null }: LandFormProps) {
       alert("Centroid Latitude and Longitude are required. Please draw boundaries or set points on the map.");
       return;
     }
-    if (!formData.ownerName.trim()) {
-      alert("Owner Full Name is required.");
-      return;
-    }
-    if (!formData.ownerPhone.trim()) {
-      alert("Owner Contact Phone is required.");
-      return;
+    if (formData.contactType === "OWNER") {
+      if (!formData.ownerName.trim()) {
+        alert("Owner Full Name is required.");
+        return;
+      }
+      if (!formData.ownerPhone.trim()) {
+        alert("Owner Contact Phone is required.");
+        return;
+      }
+    } else {
+      if (!formData.brokerId) {
+        alert("Broker Selection is required.");
+        return;
+      }
     }
     if (!formData.images || formData.images.length === 0) {
       alert("At least one property image must be uploaded.");
@@ -282,10 +447,13 @@ export default function LandForm({ initialData = null }: LandFormProps) {
           images: formData.images,
           description: formData.description,
           isPublic: formData.isPublic,
+          brokerId: formData.contactType === 'BROKER' ? (formData.brokerId || null) : null,
+          tehsil: formData.tehsil || null
         },
         admin: {
-          ownerName: formData.ownerName,
-          ownerPhone: formData.ownerPhone,
+          contactType: formData.contactType,
+          ownerName: formData.contactType === 'OWNER' ? formData.ownerName : null,
+          ownerPhone: formData.contactType === 'OWNER' ? formData.ownerPhone : null,
           expectedPrice: formData.expectedPrice,
           minimumPrice: formData.minimumPrice,
           negotiable: formData.negotiable,
@@ -417,33 +585,71 @@ export default function LandForm({ initialData = null }: LandFormProps) {
               {/* Collapsible Content */}
               <div className={`space-y-6 ${sectionsExpanded.publicInfo ? 'block' : 'hidden lg:block'}`}>
 
-                {/* Land Title and Slug Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                  {/* Land Title */}
-                  <div className="space-y-1.5">
-                    <Label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider ml-0.5">Land Title <span className="text-red-500 font-extrabold">*</span></Label>
+                 {/* Land Title and Slug Container (Slug is hidden and shown in tooltip) */}
+                <div className="bg-slate-50/40 p-5 rounded-2xl border border-slate-150/40 space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider ml-0.5">Land Title <span className="text-red-500 font-extrabold">*</span></Label>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span className="text-slate-450 hover:text-slate-650 flex items-center p-0.5 rounded transition-colors hover:bg-slate-100/50">
+                            <Info size={13} className="shrink-0" />
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent 
+                          side="right"
+                          className="bg-slate-950 text-slate-100 border border-slate-800 text-xs px-3 py-2 rounded-xl max-w-md break-all font-mono shadow-xl"
+                        >
+                          <span className="font-sans font-extrabold block mb-1 text-[9px] text-slate-400 uppercase tracking-widest">SEO Slug Preview</span>
+                          {formData.slug || "Will be auto-generated..."}
+                        </TooltipContent>
+                      </Tooltip>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCustomizeTitle(!customizeTitle);
+                        if (customizeTitle) {
+                          const generated = getGeneratedTitle(
+                            formData.area,
+                            formData.village,
+                            selectedTehsil,
+                            formData.district
+                          );
+                          handleChange("title", generated);
+                        }
+                      }}
+                      className="text-[10px] font-bold text-emerald-600 hover:text-emerald-700 flex items-center gap-1 transition-all select-none"
+                    >
+                      {customizeTitle ? (
+                        <>
+                          <Unlock size={11} />
+                          <span>Lock (Auto)</span>
+                        </>
+                      ) : (
+                        <>
+                          <Lock size={11} />
+                          <span>Unlock (Edit)</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                  <div className="relative">
                     <Input
-                      placeholder="e.g. 5 Acre Highway Touch Commercial Land"
+                      placeholder="Title will be auto-generated..."
                       value={formData.title}
-                      onChange={(e) => handleTitleChange(e.target.value)}
-                      className="h-11 px-4 bg-slate-50/40 border border-slate-200 rounded-xl hover:border-slate-300 focus:border-emerald-600 focus:bg-white focus:ring-2 focus:ring-emerald-500/10 transition-all font-semibold text-slate-900 text-sm placeholder:text-slate-400/60 placeholder:font-normal"
+                      readOnly={!customizeTitle}
+                      onChange={(e) => handleChange("title", e.target.value)}
+                      className={`h-11 px-4 border rounded-xl transition-all font-semibold text-slate-900 text-sm placeholder:text-slate-400/60 w-full ${
+                        !customizeTitle
+                          ? "bg-slate-100/70 border-slate-200 cursor-not-allowed select-text text-slate-600 font-semibold"
+                          : "bg-white border-emerald-500/30 hover:border-emerald-500 focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/10"
+                      }`}
                     />
                   </div>
-
-                  {/* Slug */}
-                  <div className="space-y-1.5">
-                    <Label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider ml-0.5">Slug (Reference Key)</Label>
-                    <Input
-                      placeholder="e.g. 5-acre-highway-touch-commercial-land"
-                      value={formData.slug}
-                      disabled={isEdit}
-                      onChange={(e) => handleChange("slug", generateSlug(e.target.value))}
-                      className={`h-11 px-4 border rounded-xl transition-all font-mono text-xs ${isEdit
-                        ? "bg-slate-100 text-slate-450 border-slate-200 cursor-not-allowed border-dashed"
-                        : "bg-slate-50/40 border-slate-200 hover:border-slate-300 focus:border-emerald-600 focus:bg-white focus:ring-2 focus:ring-emerald-500/10 placeholder:text-slate-400/60 placeholder:font-normal"
-                        }`}
-                    />
-                  </div>
+                  <p className="text-[9px] text-slate-400 font-medium uppercase tracking-wider ml-0.5 mt-1 flex items-center gap-1">
+                    <span>Generated automatically from location. Hover the info icon to preview the URL slug.</span>
+                  </p>
                 </div>
 
                 {/* Grid: Price and Area */}
@@ -465,18 +671,74 @@ export default function LandForm({ initialData = null }: LandFormProps) {
                   </div>
 
                   <div className="space-y-1.5">
-                    <Label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider ml-0.5">Total Area (Acre) <span className="text-red-500 font-extrabold">*</span></Label>
+                    <div className="flex items-center justify-between">
+                      <Label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider ml-0.5">
+                        Total Area <span className="text-red-500 font-extrabold">*</span>
+                      </Label>
+                      <div className="flex bg-slate-100 p-0.5 rounded-lg border border-slate-200 text-[9px] font-bold uppercase tracking-wider">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setAreaUnit('acre');
+                            const val = formData.area ? String(formData.area) : "";
+                            setAreaInputVal(val);
+                          }}
+                          className={`px-2 py-0.5 rounded-md transition-all select-none cursor-pointer ${
+                            areaUnit === 'acre'
+                              ? 'bg-white shadow-xs text-slate-800'
+                              : 'text-slate-400 hover:text-slate-600'
+                          }`}
+                        >
+                          Acre
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setAreaUnit('sqyard');
+                            const sqYards = formData.area ? parseFloat((formData.area * 4840).toFixed(2)) : 0;
+                            setAreaInputVal(sqYards ? String(sqYards) : "");
+                          }}
+                          className={`px-2 py-0.5 rounded-md transition-all select-none cursor-pointer ${
+                            areaUnit === 'sqyard'
+                              ? 'bg-white shadow-xs text-slate-800'
+                              : 'text-slate-400 hover:text-slate-600'
+                          }`}
+                        >
+                          Sq Yards
+                        </button>
+                      </div>
+                    </div>
+                    
                     <div className="relative group">
                       <Input
                         type="number"
-                        step="0.01"
-                        placeholder="e.g. 5.5"
-                        value={formData.area || ""}
-                        onChange={(e) => handleChange("area", parseFloat(e.target.value) || 0)}
-                        className="h-11 pl-4 pr-14 bg-slate-50/40 border border-slate-200 hover:border-slate-300 focus:border-emerald-600 focus:bg-white focus:ring-2 focus:ring-emerald-500/10 transition-all font-bold text-slate-950 text-sm placeholder:text-slate-400/60 placeholder:font-normal"
+                        step="any"
+                        placeholder={areaUnit === 'acre' ? "e.g. 5.5" : "e.g. 26620"}
+                        value={areaInputVal}
+                        onChange={(e) => {
+                          const valStr = e.target.value;
+                          setAreaInputVal(valStr);
+                          const parsed = parseFloat(valStr) || 0;
+                          if (areaUnit === 'acre') {
+                            handleChange("area", parsed);
+                          } else {
+                            handleChange("area", parseFloat((parsed / 4840).toFixed(6)));
+                          }
+                        }}
+                        className="h-11 pl-4 pr-16 bg-slate-50/40 border border-slate-200 hover:border-slate-300 focus:border-emerald-600 focus:bg-white focus:ring-2 focus:ring-emerald-500/10 transition-all font-bold text-slate-950 text-sm placeholder:text-slate-400/60 placeholder:font-normal"
                       />
-                      <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[10px] font-black text-slate-400 uppercase tracking-wider bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">Acres</span>
+                      <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[9px] font-black text-slate-400 uppercase tracking-wider bg-slate-100 px-2 py-0.5 rounded border border-slate-200 select-none">
+                        {areaUnit === 'acre' ? 'Acres' : 'Sq Yds'}
+                      </span>
                     </div>
+
+                    {/* Live conversion helper badge */}
+                    {areaUnit === 'sqyard' && formData.area > 0 && (
+                      <p className="text-[9px] text-emerald-600 font-bold uppercase tracking-wider ml-0.5 flex items-center gap-1.5 animate-in fade-in duration-200">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                        <span>Saves as ≈ {formData.area} Acres</span>
+                      </p>
+                    )}
                   </div>
                 </div>
 
@@ -550,19 +812,71 @@ export default function LandForm({ initialData = null }: LandFormProps) {
                   <Label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider ml-0.5">Haryana District <span className="text-red-500 font-extrabold">*</span></Label>
                   <DistrictDropdown
                     value={formData.district}
-                    onChange={(val) => handleChange("district", val)}
+                    onChange={(val) => {
+                      handleChange("district", val)
+                      setSelectedTehsil("")
+                      handleChange("tehsil", "")
+                      handleChange("village", "")
+                    }}
                   />
                 </div>
 
-                {/* Village */}
+                {/* Tehsil Dropdown */}
+                <div className="space-y-1.5">
+                  <Label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider ml-0.5">Tehsil <span className="text-red-500 font-extrabold">*</span></Label>
+                  <div className="relative">
+                    <select
+                      value={selectedTehsil}
+                      onChange={(e) => {
+                        const val = e.target.value
+                        setSelectedTehsil(val)
+                        handleChange("tehsil", val)
+                        handleChange("village", "")
+                      }}
+                      disabled={!formData.district}
+                      className="w-full h-11 rounded-xl border border-slate-200 bg-slate-50/40 hover:border-slate-300 px-4 text-xs font-semibold text-slate-900 focus:bg-white focus:border-emerald-600 focus:ring-emerald-500/10 focus:outline-none transition-all appearance-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <option value="">
+                        {formData.district ? "Select Tehsil" : "Select District First"}
+                      </option>
+                      {availableTehsils.map((t) => (
+                        <option key={t} value={t}>
+                          {t}
+                        </option>
+                      ))}
+                    </select>
+                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                      <ChevronDown size={14} className="opacity-75" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Village Dropdown */}
                 <div className="space-y-1.5">
                   <Label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider ml-0.5">Village / Locality <span className="text-red-500 font-extrabold">*</span></Label>
-                  <Input
-                    placeholder="e.g. Sampla / Khanda Kheri"
-                    value={formData.village}
-                    onChange={(e) => handleChange("village", e.target.value)}
-                    className="h-11 px-4 bg-slate-50/40 border border-slate-200 hover:border-slate-300 focus:border-emerald-600 focus:bg-white focus:ring-2 focus:ring-emerald-500/10 transition-all font-semibold text-slate-900 text-sm placeholder:text-slate-400/60 placeholder:font-normal"
-                  />
+                  <div className="relative">
+                    <select
+                      value={formData.village}
+                      onChange={(e) => handleChange("village", e.target.value)}
+                      disabled={!selectedTehsil}
+                      className="w-full h-11 rounded-xl border border-slate-200 bg-slate-50/40 hover:border-slate-300 px-4 text-xs font-semibold text-slate-900 focus:bg-white focus:border-emerald-600 focus:ring-emerald-500/10 focus:outline-none transition-all appearance-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <option value="">
+                        {selectedTehsil ? "Select Village" : "Select Tehsil First"}
+                      </option>
+                      {availableVillages.map((v) => (
+                        <option key={v} value={v}>
+                          {v}
+                        </option>
+                      ))}
+                      {formData.village && !availableVillages.includes(formData.village) && (
+                        <option value={formData.village}>{formData.village}</option>
+                      )}
+                    </select>
+                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+                      <ChevronDown size={14} className="opacity-75" />
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -821,10 +1135,9 @@ export default function LandForm({ initialData = null }: LandFormProps) {
           <div className="bg-white rounded-[24px] border border-slate-200/60 p-6 md:p-8 shadow-sm hover:shadow-md/20 transition-all duration-300 space-y-6">
             {/* Header with Accordion Toggle for Mobile */}
             <div
-              className="flex items-center justify-between border-b border-slate-100 pb-4 cursor-pointer lg:cursor-default select-none"
-              onClick={() => toggleSection('desc')}
+              className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 pb-4 gap-4 select-none"
             >
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 cursor-pointer lg:cursor-default" onClick={() => toggleSection('desc')}>
                 <div className="w-10 h-10 rounded-xl bg-slate-100 text-slate-600 flex items-center justify-center border border-slate-200/50 shadow-sm shrink-0">
                   <FileText size={18} strokeWidth={2.5} />
                 </div>
@@ -833,9 +1146,16 @@ export default function LandForm({ initialData = null }: LandFormProps) {
                   <p className="text-[10px] text-slate-400 font-bold mt-1 uppercase tracking-wider">Visible to all prospective buyers</p>
                 </div>
               </div>
-              <button type="button" className="lg:hidden text-slate-400 hover:text-slate-600 transition">
-                {sectionsExpanded.desc ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-              </button>
+              
+              <div className="flex items-center gap-3 justify-between sm:justify-end">
+                <CopyAiPromptButton
+                  getLandData={getLandDataForAiPrompt}
+                  onSuccess={showToast}
+                />
+                <button type="button" className="lg:hidden text-slate-400 hover:text-slate-600 transition" onClick={() => toggleSection('desc')}>
+                  {sectionsExpanded.desc ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                </button>
+              </div>
             </div>
 
             {/* Collapsible Content */}
@@ -930,36 +1250,237 @@ export default function LandForm({ initialData = null }: LandFormProps) {
                 </div>
               </div>
 
-              {/* Box B: Owner Information */}
+              {/* Box B: Contact & Source Details */}
               <div className="space-y-4">
                 <div className="flex items-center gap-2 border-b border-slate-100 pb-3 mb-4">
                   <span className="w-1 h-3.5 bg-indigo-500 rounded-full"></span>
-                  <h5 className="text-[11px] font-black text-slate-700 uppercase tracking-widest">Owner Information</h5>
+                  <h5 className="text-[11px] font-black text-slate-700 uppercase tracking-widest">Contact & Source Details</h5>
                 </div>
 
                 <div className="space-y-4">
+                  {/* Contact Source selector */}
                   <div className="space-y-1.5">
-                    <Label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider ml-0.5">Owner Full Name <span className="text-red-500 font-extrabold">*</span></Label>
-                    <Input
-                      placeholder="e.g. Ramesh Kumar"
-                      value={formData.ownerName}
-                      onChange={(e) => handleChange("ownerName", e.target.value)}
-                      className="h-11 px-4 bg-slate-50/40 border border-slate-200 hover:border-slate-350 focus:border-purple-600 focus:bg-white focus:ring-2 focus:ring-purple-500/10 font-semibold text-slate-900 text-xs rounded-xl placeholder:text-slate-400/60 placeholder:font-normal"
-                    />
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <Label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider ml-0.5">Owner Contact Phone <span className="text-red-500 font-extrabold">*</span></Label>
-                    <div className="relative group">
-                      <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"><Phone size={13} /></span>
-                      <Input
-                        placeholder="e.g. 9876543210"
-                        value={formData.ownerPhone}
-                        onChange={(e) => handleChange("ownerPhone", e.target.value)}
-                        className="h-11 pl-9 pr-4 bg-slate-50/40 border border-slate-200 hover:border-slate-350 focus:border-purple-600 focus:bg-white focus:ring-2 focus:ring-purple-500/10 font-semibold text-slate-900 text-xs rounded-xl placeholder:text-slate-400/60 placeholder:font-normal"
-                      />
+                    <Label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider ml-0.5">Contact Source</Label>
+                    <div className="flex items-center gap-6 mt-1 bg-slate-50/40 border border-slate-200/60 p-3 rounded-xl">
+                      <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer select-none">
+                        <input
+                          type="radio"
+                          name="contactType"
+                          value="OWNER"
+                          checked={formData.contactType === "OWNER"}
+                          onChange={() => handleChange("contactType", "OWNER")}
+                          className="w-4 h-4 text-purple-600 border-slate-350 focus:ring-purple-500 focus:ring-2"
+                        />
+                        <span>Direct Owner</span>
+                      </label>
+                      <label className="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer select-none">
+                        <input
+                          type="radio"
+                          name="contactType"
+                          value="BROKER"
+                          checked={formData.contactType === "BROKER"}
+                          onChange={() => handleChange("contactType", "BROKER")}
+                          className="w-4 h-4 text-purple-600 border-slate-350 focus:ring-purple-500 focus:ring-2"
+                        />
+                        <span>Broker</span>
+                      </label>
                     </div>
                   </div>
+
+                  {formData.contactType === "OWNER" ? (
+                    <>
+                      {/* Owner Full Name */}
+                      <div className="space-y-1.5">
+                        <Label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider ml-0.5">Owner Full Name <span className="text-red-500 font-extrabold">*</span></Label>
+                        <Input
+                          placeholder="e.g. Ramesh Kumar"
+                          value={formData.ownerName}
+                          onChange={(e) => handleChange("ownerName", e.target.value)}
+                          className="h-11 px-4 bg-slate-50/40 border border-slate-200 hover:border-slate-350 focus:border-purple-600 focus:bg-white focus:ring-2 focus:ring-purple-500/10 font-semibold text-slate-900 text-xs rounded-xl placeholder:text-slate-400/60 placeholder:font-normal"
+                        />
+                      </div>
+
+                      {/* Owner Contact Phone */}
+                      <div className="space-y-1.5">
+                        <Label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider ml-0.5">Owner Contact Phone <span className="text-red-500 font-extrabold">*</span></Label>
+                        <div className="relative group">
+                          <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs"><Phone size={13} /></span>
+                          <Input
+                            placeholder="e.g. 9876543210"
+                            value={formData.ownerPhone}
+                            onChange={(e) => handleChange("ownerPhone", e.target.value)}
+                            className="h-11 pl-9 pr-4 bg-slate-50/40 border border-slate-200 hover:border-slate-350 focus:border-purple-600 focus:bg-white focus:ring-2 focus:ring-purple-500/10 font-semibold text-slate-900 text-xs rounded-xl placeholder:text-slate-400/60 placeholder:font-normal"
+                          />
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      {/* Searchable Broker Sheet Trigger & Selection */}
+                      <div className="space-y-1.5 relative">
+                        <Label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider ml-0.5">Select Broker <span className="text-red-500 font-extrabold">*</span></Label>
+                        <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+                          {(() => {
+                            const selectedBroker = brokers.find(b => b.id === formData.brokerId || b.$id === formData.brokerId);
+                            const filteredBrokers = brokers.filter(b => {
+                              const q = searchQuery.toLowerCase();
+                              return (
+                                b.name.toLowerCase().includes(q) ||
+                                b.brokerCode.toLowerCase().includes(q) ||
+                                b.mobileNumber.toLowerCase().includes(q)
+                              );
+                            });
+
+                            return (
+                              <>
+                                {selectedBroker ? (
+                                  <div className="bg-slate-50/40 rounded-xl border border-stone-200 p-4 shadow-xs space-y-3 relative overflow-hidden group hover:bg-white transition-all">
+                                    {/* Accent decoration */}
+                                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-purple-600"></div>
+                                    <div className="flex items-start justify-between gap-3">
+                                      <div>
+                                        <p className="text-[9px] font-bold text-purple-600 uppercase tracking-widest mb-0.5">Assigned Partner Broker</p>
+                                        <h4 className="text-sm font-semibold text-stone-900 leading-tight">{selectedBroker.name}</h4>
+                                        <p className="text-[10px] text-stone-500 mt-1 font-mono">
+                                          Code: {selectedBroker.brokerCode} &bull; {selectedBroker.district}, {selectedBroker.tehsil}
+                                        </p>
+                                      </div>
+                                      <span className={`px-2 py-0.5 rounded text-[8px] font-black tracking-wider uppercase border shrink-0 ${
+                                        selectedBroker.reputation === 'DIAMOND' 
+                                          ? 'bg-cyan-50 text-cyan-700 border-cyan-100'
+                                          : selectedBroker.reputation === 'GOLD'
+                                          ? 'bg-amber-50 text-amber-700 border-amber-100'
+                                          : 'bg-slate-50 text-slate-700 border-slate-100'
+                                      }`}>
+                                        {selectedBroker.reputation}
+                                      </span>
+                                    </div>
+                                    
+                                    <div className="pt-2.5 border-t border-stone-150/60 flex items-center justify-between text-[11px] font-semibold text-stone-600">
+                                      <div className="flex items-center gap-1.5">
+                                        <Phone size={12} className="text-stone-400" />
+                                        <span>{selectedBroker.mobileNumber}</span>
+                                      </div>
+                                      <SheetTrigger asChild>
+                                        <button
+                                          type="button"
+                                          className="text-[10px] font-bold text-purple-600 hover:text-purple-750 uppercase tracking-wider cursor-pointer"
+                                        >
+                                          Change Broker
+                                        </button>
+                                      </SheetTrigger>
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <SheetTrigger asChild>
+                                    <button
+                                      type="button"
+                                      className="w-full h-24 rounded-xl border border-dashed border-slate-305 hover:border-purple-500 hover:bg-purple-50/10 hover:text-purple-650 transition-all flex flex-col items-center justify-center gap-1.5 text-slate-400 cursor-pointer"
+                                    >
+                                      <Plus size={18} strokeWidth={2.5} />
+                                      <span className="text-[10px] font-black uppercase tracking-widest">Select Partner Broker</span>
+                                    </button>
+                                  </SheetTrigger>
+                                )}
+
+                                <SheetContent className="p-0 bg-white border-l border-stone-200">
+                                  <SheetHeader className="p-6 border-b border-stone-100">
+                                    <SheetTitle className="text-base font-sans font-bold text-stone-900 leading-none">Select Partner Broker</SheetTitle>
+                                    <SheetDescription className="text-xs text-stone-500 mt-1.5 leading-relaxed">
+                                      Search and assign a broker from your registered Haryana partner network.
+                                    </SheetDescription>
+                                  </SheetHeader>
+                                  
+                                  <div className="p-4 border-b border-stone-50 bg-stone-50/30">
+                                    <div className="relative group">
+                                      <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-450">
+                                        <Search size={14} />
+                                      </span>
+                                      <Input
+                                        type="text"
+                                        placeholder="Search name, code, or phone number..."
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                        className="h-10 pl-9 pr-4 bg-white border border-slate-200 hover:border-slate-350 focus:border-purple-600 focus:ring-2 focus:ring-purple-500/10 text-xs rounded-xl"
+                                        autoFocus
+                                      />
+                                    </div>
+                                  </div>
+                                  
+                                  <div className="overflow-y-auto flex-1 p-6 space-y-4 max-h-[calc(100vh-180px)]">
+                                    {filteredBrokers.length > 0 ? (
+                                      filteredBrokers.map((b) => {
+                                        const isSelected = b.id === formData.brokerId || b.$id === formData.brokerId;
+                                        return (
+                                          <div
+                                            key={b.id || b.$id}
+                                            onClick={() => {
+                                              handleChange("brokerId", (b.id || b.$id) as string);
+                                              setIsSheetOpen(false);
+                                              setSearchQuery("");
+                                            }}
+                                            className={`p-4 rounded-xl border text-left cursor-pointer transition-all flex flex-col gap-2 relative overflow-hidden group ${
+                                              isSelected 
+                                                ? 'border-purple-600 bg-purple-50/10 shadow-xs ring-1 ring-purple-500/10' 
+                                                : 'border-stone-200 hover:border-stone-300 hover:bg-stone-50/40 bg-white'
+                                            }`}
+                                          >
+                                            {isSelected && (
+                                              <div className="absolute left-0 top-0 bottom-0 w-1 bg-purple-600"></div>
+                                            )}
+                                            <div className="flex items-start justify-between gap-3">
+                                              <div>
+                                                <h4 className="text-sm font-semibold text-stone-900 group-hover:text-purple-650 transition-colors">
+                                                  {b.name}
+                                                </h4>
+                                                <p className="text-[10px] text-stone-500 font-mono mt-0.5">
+                                                  Code: {b.brokerCode}
+                                                </p>
+                                              </div>
+                                              <span className={`px-2 py-0.5 rounded text-[8px] font-black tracking-wider uppercase border shrink-0 ${
+                                                b.reputation === 'DIAMOND' 
+                                                  ? 'bg-cyan-50 text-cyan-700 border-cyan-100'
+                                                  : b.reputation === 'GOLD'
+                                                  ? 'bg-amber-50 text-amber-700 border-amber-100'
+                                                  : 'bg-slate-50 text-slate-700 border-slate-100'
+                                              }`}>
+                                                {b.reputation}
+                                              </span>
+                                            </div>
+                                            
+                                            <div className="pt-2 border-t border-stone-100/50 flex flex-col gap-1 text-[10px] text-stone-500">
+                                              <div className="flex items-center gap-1.5">
+                                                <span className="font-semibold text-stone-700">Region:</span>
+                                                <span>{b.district}, {b.tehsil}</span>
+                                              </div>
+                                              <div className="flex items-center gap-1.5">
+                                                <span className="font-semibold text-stone-700">Phone:</span>
+                                                <span>{b.mobileNumber}</span>
+                                              </div>
+                                              {b.officeName && (
+                                                <div className="flex items-center gap-1.5">
+                                                  <span className="font-semibold text-stone-700">Office:</span>
+                                                  <span className="truncate max-w-[200px]">{b.officeName}</span>
+                                                </div>
+                                              )}
+                                            </div>
+                                          </div>
+                                        );
+                                      })
+                                    ) : (
+                                      <div className="p-8 text-center text-xs text-slate-400 font-medium bg-stone-50/30 rounded-xl border border-dashed border-stone-200">
+                                        No brokers found matching &quot;{searchQuery}&quot;
+                                      </div>
+                                    )}
+                                  </div>
+                                </SheetContent>
+                              </>
+                            );
+                          })()}
+                        </Sheet>
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
 
@@ -1021,6 +1542,12 @@ export default function LandForm({ initialData = null }: LandFormProps) {
           </div>
         </div>
 
+      {toastMessage && (
+        <div className="fixed bottom-6 right-6 z-50 bg-stone-900 text-white text-xs px-4 py-2.5 rounded-full shadow-lg border border-stone-800 animate-in fade-in slide-in-from-bottom-4 duration-300 font-semibold tracking-wide uppercase flex items-center gap-2 select-none pointer-events-none">
+          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+          {toastMessage}
+        </div>
+      )}
       </form>
     </TooltipProvider>
   )

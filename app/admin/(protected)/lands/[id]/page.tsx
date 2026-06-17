@@ -7,6 +7,7 @@ import { Loader2 } from "lucide-react"
 
 import LandAdminView from "@/components/admin/LandAdminView"
 import { landService } from "@/services/land.service"
+import { brokerService } from "@/services/broker.service"
 
 import { FlattenedLand } from "@/lib/types"
 
@@ -21,12 +22,22 @@ export default function ViewLandPage() {
       setLoading(true)
       const fullData = await landService.getFullLandById(id)
       
+      let brokerData = null
+      if (fullData.land.brokerId) {
+        try {
+          brokerData = await brokerService.getBrokerById(fullData.land.brokerId)
+        } catch (err) {
+          console.error("Error fetching linked broker details:", err)
+        }
+      }
+      
       const flattenedData: FlattenedLand = {
         ...fullData.land,
         ...fullData.admin,
         polygon: fullData.polygon?.polygon || null,
         id: fullData.land.$id,
-        $id: fullData.land.$id
+        $id: fullData.land.$id,
+        broker: brokerData || undefined
       }
       
       setData(flattenedData)

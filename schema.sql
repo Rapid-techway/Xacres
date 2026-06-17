@@ -44,8 +44,9 @@ create table if not exists public.land_images (
 create table if not exists public.lands_admin (
     id uuid default uuid_generate_v4() primary key,
     land_id uuid references public.lands(id) on delete cascade not null unique,
-    owner_name text not null,
-    owner_phone text not null,
+    contact_type varchar(20) default 'OWNER',
+    owner_name text,
+    owner_phone text,
     expected_price numeric not null,
     minimum_price numeric not null,
     negotiable boolean not null default true,
@@ -172,3 +173,52 @@ on public.land_leads for all
 to authenticated
 using (true)
 with check (true);
+
+-- =========================================================================
+-- 6. Brokers Table (Confidential/Sensitive CRM Information)
+-- =========================================================================
+create table if not exists public.brokers (
+    id uuid default uuid_generate_v4() primary key,
+    broker_code varchar(50) unique not null,
+    name varchar(150) not null,
+    office_name varchar(200),
+    mobile_number varchar(20) not null,
+    alternate_mobile_number varchar(20),
+    district varchar(100) not null,
+    tehsil varchar(100) not null,
+    address text,
+    google_location_url text,
+    experience_years integer default 0,
+    referred_by varchar(150),
+    reputation varchar(20) not null check (reputation in ('SILVER', 'GOLD', 'DIAMOND')),
+    description text,
+    created_at timestamp with time zone default timezone('utc'::text, now()) not null,
+    updated_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+-- Index creation
+create index if not exists idx_broker_name on public.brokers(name);
+create index if not exists idx_broker_district on public.brokers(district);
+create index if not exists idx_broker_tehsil on public.brokers(tehsil);
+
+-- Trigger to automatically update updated_at on brokers table
+create trigger on_brokers_update
+    before update on public.brokers
+    for each row execute procedure public.handle_updated_at();
+
+-- Enable Row Level Security (RLS) on brokers table
+alter table public.brokers enable row level security;
+
+-- RLS Policy: Only Authenticated admins can view, create, edit, or delete broker data
+create policy "Allow admins full access to brokers"
+on public.brokers for all
+to authenticated
+using (true)
+with check (true);
+
+-- =========================================================================
+-- 7. Lands Table Schema Modification: Broker Association
+-- =========================================================================
+alter table public.lands add column if not exists broker_id uuid references public.brokers(id) on delete set null;
+alter table public.lands add column if not exists tehsil text;
+alter table public.lands add column if not exists listing_number bigint generated always as identity (start with 10000) unique;
