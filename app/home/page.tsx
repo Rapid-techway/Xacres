@@ -1,22 +1,31 @@
-import { LeonardoHero } from "@/components/home/leonardo-hero"
-import { HeroScrubStory } from "@/components/home/hero-scrub-story"
-import { ParallaxShowcase } from "@/components/home/parallax-showcase"
-import { FeatureGrid } from "@/components/home/feature-grid"
-import { CTABottom } from "@/components/home/cta-bottom"
-import { Footer1 } from "@/components/home2/footer1"
+import { Metadata } from 'next';
+import HeroLayout from '@/components/home/HeroLayout';
+import HighlightsSection from '@/components/home/HighlightsSection';
+import MapSection from '@/components/home/MapSection';
+import AboutSection from '@/components/home/AboutSection';
+import ValuesSection from '@/components/home/ValuesSection';
+import FaqSection from '@/components/home/FaqSection';
+import { Footer1 } from '@/components/home/footer1';
 
-export default function Home() {
+export const metadata: Metadata = {
+  title: 'Xacres - Direct, Verified & Hassle-free Land in Haryana',
+  description: 'Discover premium land opportunities in Haryana with absolute clarity. Explore agricultural, farming, and commercial land listings directly from verified owners.',
+};
+
+export default function Home2Page() {
   return (
-    <main className="bg-white text-gray-900 selection:bg-blue-100 selection:text-blue-900">
-      {/* 3D Leonardo-style Hero */}
-      <LeonardoHero />
-
-      {/* These flow naturally after the hero unpins */}
-      <HeroScrubStory />
-      <ParallaxShowcase />
-      <FeatureGrid />
-      <CTABottom />
+    <main className="w-full min-h-screen bg-black">
+      <HeroLayout />
+      <HighlightsSection />
+      <MapSection />
+      <AboutSection />
+      <ValuesSection />
+      <FaqSection />
       <Footer1 />
     </main>
-  )
+  );
 }
+
+
+
+
