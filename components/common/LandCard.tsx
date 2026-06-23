@@ -5,19 +5,25 @@ import Link from 'next/link';
 import { MapPin, Sprout, Heart, Ruler, Route } from 'lucide-react';
 import { Land } from '@/lib/types';
 import { formatPrice } from '@/lib/utils';
-import { useState } from 'react';
+
+import { useSavedLandsStore } from '@/store/useSavedLandsStore';
+import { useMounted } from '@/hooks/useMounted';
 
 interface LandCardProps {
   land: Land;
 }
 
 export default function LandCard({ land }: LandCardProps) {
-  const [isFavorite, setIsFavorite] = useState(false);
+  const mounted = useMounted();
+  const { savedLands, toggleSave } = useSavedLandsStore();
+
+  const landId = land.$id || land.id || '';
+  const isFavorite = mounted && savedLands.some(item => (item.$id === landId || item.id === landId));
 
   const handleFavoriteClick = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setIsFavorite(!isFavorite);
+    toggleSave(land);
   };
 
   const primaryImage = land.images.find(img => img.isPrimary)?.url ||

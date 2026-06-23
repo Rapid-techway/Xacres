@@ -129,7 +129,7 @@ export default async function DistrictLandsPage({ params }: PageProps) {
   }
 
   return (
-    <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-10 py-8 space-y-8 animate-in fade-in duration-500">
+    <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-10 pt-28 pb-8 space-y-8 animate-in fade-in duration-500">
       {/* Directory Title / Header */}
       <div className="border-b border-gray-100 pb-6">
         <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight text-gray-900 flex items-center gap-3">

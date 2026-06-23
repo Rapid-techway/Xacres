@@ -43,7 +43,7 @@ export default function LandView({ data }: LandViewProps) {
 
   return (
     <>
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8 animate-in fade-in duration-700">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-8 space-y-8 animate-in fade-in duration-700">
         {/* Header Info (Breadcrumbs, Title, Share) */}
         <SubHeaderInfo data={data} />
 

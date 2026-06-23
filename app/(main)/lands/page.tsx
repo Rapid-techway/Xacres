@@ -5,9 +5,8 @@ import { useFilterStore } from '@/store/useFilterStore';
 import LandCard from '@/components/common/LandCard';
 import { LayoutGrid, MapPin, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import Link from 'next/link';
 import { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import FloatingToggler from '@/components/common/FloatingToggler';
 
 export default function PublicLandsPage() {
   const { resetFilters } = useFilterStore();
@@ -37,7 +36,7 @@ export default function PublicLandsPage() {
   }, []);
 
   return (
-    <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-10 py-8">
+    <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-10 pt-28 pb-8">
       {/* Page Header / Results Count */}
       <div className="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -98,24 +97,7 @@ export default function PublicLandsPage() {
       )}
 
       {/* Floating View Switcher */}
-      <AnimatePresence>
-        {showButton && (
-          <motion.div 
-            initial={{ opacity: 0, y: 20, x: '-50%' }}
-            animate={{ opacity: 1, y: 0, x: '-50%' }}
-            exit={{ opacity: 0, y: 20, x: '-50%' }}
-            className="fixed bottom-12 left-1/2 z-30"
-          >
-            <Link 
-              href="/"
-              className="flex items-center gap-2 bg-gray-900 hover:bg-black text-white px-5 py-3 rounded-full shadow-2xl transition-all hover:scale-105 active:scale-95 font-bold text-[14px]"
-            >
-              <span>Show map</span>
-              <MapPin size={18} />
-            </Link>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      <FloatingToggler show={showButton} />
 
       {/* Bottom Info */}
       {!isLoading && filteredLands.length > 0 && (
