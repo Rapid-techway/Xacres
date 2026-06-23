@@ -10,6 +10,7 @@ import {
   Inbox,
   LogOut,
   Users,
+  Briefcase,
 } from "lucide-react";
 
 import {
@@ -37,7 +38,8 @@ const navItems = [
   { name: "Lands", href: "/admin/lands", icon: Map },
   { name: "Add Land", href: "/admin/lands/new", icon: PlusSquare },
   { name: "Brokers", href: "/admin/brokers", icon: Users },
-  { name: "Leads", href: "/admin/leads", icon: Inbox },
+  { name: "Buyer Leads", href: "/admin/buyer-leads", icon: Inbox },
+  { name: "Seller Leads", href: "/admin/seller-leads", icon: Briefcase },
 ];
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {

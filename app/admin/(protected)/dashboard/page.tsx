@@ -22,8 +22,8 @@ import { formatPrice } from "@/lib/utils"
 interface DashboardLead {
   id: string
   name: string
-  phone: string
-  budget: string | null
+  phoneNumber: string
+  purchasePurpose: string
   created_at: string
   lands: {
     title: string
@@ -62,13 +62,13 @@ export default function AdminDashboard() {
             privateCount: dashboardStats.privateCount,
             leadsCount: dashboardStats.leadsCount,
             recentLands: dashboardStats.recentLands,
-            recentLeads: (dashboardStats.recentLeads || []).map((lead: { id: string; name: string; phone: string; budget: string | null; created_at: string; lands: unknown }) => {
+            recentLeads: (dashboardStats.recentLeads || []).map((lead: { id: string; name: string; phone_number: string; purchase_purpose: string; created_at: string; lands: unknown }) => {
               const landData = lead.lands as { title: string } | null
               return {
                 id: lead.id,
                 name: lead.name,
-                phone: lead.phone,
-                budget: lead.budget,
+                phoneNumber: lead.phone_number,
+                purchasePurpose: lead.purchase_purpose,
                 created_at: lead.created_at,
                 lands: landData ? { title: landData.title } : null
               }
@@ -224,7 +224,7 @@ export default function AdminDashboard() {
 
                     <div className="text-right shrink-0">
                       <p className="font-sans font-semibold text-stone-900 text-[14px]">
-                        ₹{formatPrice(land.price)}
+                        ₹{formatPrice(land.listedPrice)}
                       </p>
                       <p className="text-[9px] text-stone-400 font-bold uppercase tracking-wider mt-0.5">
                         {land.area} acres
@@ -288,13 +288,15 @@ export default function AdminDashboard() {
                         <Clock size={10} />
                         {formatLeadTime(lead.created_at)}
                       </p>
-                      {lead.budget ? (
-                        <div className="inline-block px-2.5 py-0.5 bg-stone-200/50 text-stone-700 rounded-full text-[9px] font-bold border border-stone-200">
-                          {lead.budget}
-                        </div>
-                      ) : (
-                        <div className="text-[9px] text-stone-400 italic font-medium">No budget</div>
-                      )}
+                      <span className={`inline-block px-2.5 py-0.5 rounded-full text-[9px] font-bold border ${
+                        lead.purchasePurpose === 'Agriculture' 
+                          ? 'bg-emerald-50 text-emerald-700 border-emerald-100'
+                          : lead.purchasePurpose === 'Commercial'
+                          ? 'bg-blue-50 text-blue-700 border-blue-100'
+                          : 'bg-amber-50 text-amber-700 border-amber-100'
+                      }`}>
+                        {lead.purchasePurpose}
+                      </span>
                     </div>
                   </div>
                 ))

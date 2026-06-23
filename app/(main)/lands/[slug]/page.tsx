@@ -51,11 +51,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     }
   }
 
-  const title = `${land.area} Acres ${land.type} Land in ${land.village}, ${land.district}, Haryana | Xacres`
+  const title = `${land.area} Acres ${land.landType} Land in ${land.village}, ${land.district}, Haryana | Xacres`
 
   const description =
     land.description?.slice(0, 140) ||
-    `${land.area} acre ${land.type} land for sale in ${land.village}, ${land.district}, Haryana. View map, images & contact details on Xacres.`
+    `${land.area} acre ${land.landType} land for sale in ${land.village}, ${land.district}, Haryana. View map, images & contact details on Xacres.`
 
   const imageUrl = land.images?.[0]?.url || "/logoFull.png"
 
@@ -96,7 +96,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     },
 
     keywords: [
-      `${land.type} land in ${land.district}`,
+      `${land.landType} land in ${land.district}`,
       `land for sale in ${land.village}`,
       `${land.area} acre land Haryana`,
       `buy land in ${land.district}`,
@@ -146,13 +146,13 @@ export default async function PublicLandDetailsPage({ params }: PageProps) {
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'RealEstateListing',
-    'name': `${data.area} Acres ${data.type} Land in ${data.village}, ${data.district}, Haryana`,
+    'name': `${data.area} Acres ${data.landType} Land in ${data.village}, ${data.district}, Haryana`,
     'description': data.description || `${data.area} acre land for sale in ${data.village}, ${data.district}, Haryana.`,
     'image': imageUrl,
     'url': `${appUrl}/lands/${slug}`,
     'offers': {
       '@type': 'QuantitativeValue',
-      'value': data.price,
+      'value': data.listedPrice,
       'unitText': 'INR'
     },
     'address': {

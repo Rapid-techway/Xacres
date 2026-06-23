@@ -6,8 +6,8 @@ interface DbBroker {
   broker_code: string;
   name: string;
   office_name: string | null;
-  mobile_number: string;
-  alternate_mobile_number: string | null;
+  phone_number: string;
+  alternate_phone_number: string | null;
   district: string;
   tehsil: string;
   address: string | null;
@@ -18,8 +18,9 @@ interface DbBroker {
   description: string | null;
   created_at: string;
   updated_at: string;
-}interface DbBrokerWithLands extends DbBroker {
+}interface DbBrokerWithRelations extends DbBroker {
   lands?: { id: string }[];
+  broker_images?: { id: string; image_url: string; created_at: string }[];
 }
 
 interface DbLandSnippet {
@@ -27,21 +28,21 @@ interface DbLandSnippet {
   title: string;
   district: string;
   village: string;
-  price: number;
-  area: number;
+  listed_price: number;
+  area_acres: number;
   is_public: boolean;
   tehsil?: string | null;
 }
 
-function mapDbBrokerToFrontend(dbBroker: DbBroker, totalLands = 0): Broker {
+function mapDbBrokerToFrontend(dbBroker: DbBrokerWithRelations, totalLands = 0): Broker {
   return {
     id: dbBroker.id,
     $id: dbBroker.id,
     brokerCode: dbBroker.broker_code,
     name: dbBroker.name,
     officeName: dbBroker.office_name || undefined,
-    mobileNumber: dbBroker.mobile_number,
-    alternateMobileNumber: dbBroker.alternate_mobile_number || undefined,
+    phoneNumber: dbBroker.phone_number,
+    alternatePhoneNumber: dbBroker.alternate_phone_number || undefined,
     district: dbBroker.district,
     tehsil: dbBroker.tehsil,
     address: dbBroker.address || undefined,
@@ -52,7 +53,13 @@ function mapDbBrokerToFrontend(dbBroker: DbBroker, totalLands = 0): Broker {
     description: dbBroker.description || undefined,
     createdAt: dbBroker.created_at,
     updatedAt: dbBroker.updated_at,
-    totalLands
+    totalLands,
+    images: dbBroker.broker_images?.map(img => ({
+      id: img.id,
+      brokerId: dbBroker.id,
+      imageUrl: img.image_url,
+      createdAt: img.created_at
+    })) || []
   };
 }
 
@@ -83,7 +90,7 @@ export const brokerService = {
       if (filters?.search && filters.search.trim() !== '') {
         const searchVal = filters.search.trim();
         query = query.or(
-          `name.ilike.%${searchVal}%,broker_code.ilike.%${searchVal}%,mobile_number.ilike.%${searchVal}%,office_name.ilike.%${searchVal}%`
+          `name.ilike.%${searchVal}%,broker_code.ilike.%${searchVal}%,phone_number.ilike.%${searchVal}%,office_name.ilike.%${searchVal}%`
         );
       }
 
@@ -104,7 +111,7 @@ export const brokerService = {
 
       if (error) throw error;
 
-      const brokers = (data || []).map((dbBroker: DbBrokerWithLands) => {
+      const brokers = (data || []).map((dbBroker: DbBrokerWithRelations) => {
         const landCount = dbBroker.lands ? dbBroker.lands.length : 0;
         return mapDbBrokerToFrontend(dbBroker, landCount);
       });
@@ -126,7 +133,7 @@ export const brokerService = {
     try {
       const { data, error } = await supabase
         .from('brokers')
-        .select('*')
+        .select('*, broker_images(*)')
         .eq('id', id)
         .single();
 
@@ -145,9 +152,9 @@ export const brokerService = {
     try {
       const { data, error } = await (supabase
         .from('brokers')
-        .select('*, lands(id, title, district, tehsil, village, price, area, is_public)')
+        .select('*, broker_images(*), lands(id, title, district, tehsil, village, listed_price, area_acres, is_public)')
         .eq('id', id)
-        .single() as unknown as Promise<{ data: (DbBroker & { lands: DbLandSnippet[] | null }) | null; error: unknown }>);
+        .single() as unknown as Promise<{ data: (DbBrokerWithRelations & { lands: DbLandSnippet[] | null }) | null; error: unknown }>);
 
       if (error) throw error;
       if (!data) throw new Error('Broker not found');
@@ -160,12 +167,12 @@ export const brokerService = {
         district: l.district,
         tehsil: l.tehsil || null,
         village: l.village,
-        price: Number(l.price),
-        area: Number(l.area),
+        listedPrice: Number(l.listed_price),
+        area: Number(l.area_acres),
         isPublic: l.is_public,
         images: [],
         description: '',
-        type: '',
+        landType: '',
         roadAccess: false,
         latitude: 0,
         longitude: 0
@@ -243,8 +250,8 @@ export const brokerService = {
           broker_code: brokerCode,
           name: data.name,
           office_name: data.officeName || null,
-          mobile_number: data.mobileNumber,
-          alternate_mobile_number: data.alternateMobileNumber || null,
+          phone_number: data.phoneNumber,
+          alternate_phone_number: data.alternatePhoneNumber || null,
           district: data.district,
           tehsil: data.tehsil,
           address: data.address || null,
@@ -258,7 +265,18 @@ export const brokerService = {
         .single();
 
       if (error) throw error;
-      return mapDbBrokerToFrontend(inserted);
+
+      // Handle direct image insertion if images are included
+      if (data.images && data.images.length > 0) {
+        const imageInserts = data.images.map((img) => ({
+          broker_id: inserted.id,
+          image_url: img.imageUrl
+        }));
+        const { error: imgError } = await supabase.from('broker_images').insert(imageInserts);
+        if (imgError) throw imgError;
+      }
+
+      return this.getBrokerById(inserted.id);
     } catch (error) {
       console.error('Error creating broker:', error);
       throw error;
@@ -273,8 +291,8 @@ export const brokerService = {
       const payload: Record<string, string | number | null> = {};
       if (data.name !== undefined) payload.name = data.name;
       if (data.officeName !== undefined) payload.office_name = data.officeName || null;
-      if (data.mobileNumber !== undefined) payload.mobile_number = data.mobileNumber;
-      if (data.alternateMobileNumber !== undefined) payload.alternate_mobile_number = data.alternateMobileNumber || null;
+      if (data.phoneNumber !== undefined) payload.phone_number = data.phoneNumber;
+      if (data.alternatePhoneNumber !== undefined) payload.alternate_phone_number = data.alternatePhoneNumber || null;
       if (data.district !== undefined) payload.district = data.district;
       if (data.tehsil !== undefined) payload.tehsil = data.tehsil;
       if (data.address !== undefined) payload.address = data.address || null;
@@ -284,15 +302,27 @@ export const brokerService = {
       if (data.reputation !== undefined) payload.reputation = data.reputation;
       if (data.description !== undefined) payload.description = data.description || null;
 
-      const { data: updated, error } = await supabase
+      const { error } = await supabase
         .from('brokers')
         .update(payload)
-        .eq('id', id)
-        .select()
-        .single();
+        .eq('id', id);
 
       if (error) throw error;
-      return mapDbBrokerToFrontend(updated);
+
+      // Sync images if passed
+      if (data.images !== undefined) {
+        await supabase.from('broker_images').delete().eq('broker_id', id);
+        if (data.images.length > 0) {
+          const imageInserts = data.images.map((img) => ({
+            broker_id: id,
+            image_url: img.imageUrl
+          }));
+          const { error: imgError } = await supabase.from('broker_images').insert(imageInserts);
+          if (imgError) throw imgError;
+        }
+      }
+
+      return this.getBrokerById(id);
     } catch (error) {
       console.error('Error updating broker:', error);
       throw error;

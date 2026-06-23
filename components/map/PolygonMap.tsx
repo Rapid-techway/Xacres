@@ -404,7 +404,7 @@ export default function PolygonMap({
   return (
     <div className="h-full w-full rounded-2xl overflow-hidden border border-gray-200 shadow-lg group relative">
       <MapContainer
-        key={isClient ? `map-${initialPosition[0]}-${initialPosition[1]}` : "map-loading"}
+        key={isClient ? "map-container" : "map-loading"}
         center={initialPosition}
         zoom={13}
         scrollWheelZoom={true}

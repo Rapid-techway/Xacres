@@ -1,5 +1,3 @@
-'use client';
-
 import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowUpRight } from 'lucide-react';
@@ -77,12 +75,11 @@ export default function MapSection() {
 
               <div className="relative w-full h-full z-10 scale-[1.6] lg:scale-[1.35]">
                 <Image
-                  src="/images/haryana-map.png"
+                  src="/images/haryana-map.webp"
                   alt="Haryana Interactive District Map"
                   fill
                   sizes="(max-w-7xl) 100vw, 50vw"
                   className="object-contain drop-shadow-[0_25px_50px_rgba(0,0,0,0.12)] select-none filter brightness-100"
-                  priority
                 />
               </div>
             </div>

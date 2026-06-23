@@ -41,6 +41,12 @@ export async function POST(req: NextRequest) {
     // 2. Parse Multipart Form Data
     const formData = await req.formData();
     const file = formData.get('file') as File | null;
+    let folder = (formData.get('folder') as string | null) || 'lands';
+    
+    // Whitelist allowed folders for security
+    if (folder !== 'lands' && folder !== 'seller-leads' && folder !== 'brokers') {
+      folder = 'lands';
+    }
 
     if (!file) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 });
@@ -53,7 +59,7 @@ export async function POST(req: NextRequest) {
     // Create unique file key to prevent namespace collisions
     const uniqueId = Math.random().toString(36).substring(2, 11);
     const cleanFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
-    const fileKey = `lands/${Date.now()}-${uniqueId}-${cleanFileName}`;
+    const fileKey = `${folder}/${Date.now()}-${uniqueId}-${cleanFileName}`;
 
     await r2Client.send(new PutObjectCommand({
       Bucket: r2BucketName,

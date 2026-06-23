@@ -29,7 +29,7 @@ export default function ImageGrid({ images, title }: ImageGridProps) {
 
   const handleTouchEnd = () => {
     if (touchStartX.current === null || touchEndX.current === null) return;
-    
+
     const diffX = touchStartX.current - touchEndX.current;
     const minSwipeDistance = 50; // Minimum distance in px to register a swipe
 
@@ -128,7 +128,7 @@ export default function ImageGrid({ images, title }: ImageGridProps) {
 
   return (
     <>
-      <div className="relative group rounded-xl overflow-hidden shadow-sm">
+      <div className="relative group rounded-xl overflow-hidden">
         <div className="aspect-[16/9] md:aspect-[21/9] w-full md:h-[350px]">
           <div
             className={`grid h-full w-full gap-2 
@@ -258,7 +258,7 @@ export default function ImageGrid({ images, title }: ImageGridProps) {
 
       {/* Full Screen Modal */}
       {selectedImageIndex !== null && typeof document !== "undefined" && createPortal(
-        <div 
+        <div
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}

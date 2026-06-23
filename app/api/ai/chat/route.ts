@@ -46,13 +46,13 @@ Style Guidelines:
             query = query.ilike('district', `%${district}%`);
           }
           if (maxPrice) {
-            query = query.lte('price', maxPrice);
+            query = query.lte('listed_price', maxPrice);
           }
           if (minArea) {
-            query = query.gte('area', minArea);
+            query = query.gte('area_acres', minArea);
           }
           if (maxArea) {
-            query = query.lte('area', maxArea);
+            query = query.lte('area_acres', maxArea);
           }
 
           const { data: dbLands, error } = await query
@@ -80,12 +80,12 @@ Style Guidelines:
                 id: dbLand.id,
                 slug: dbLand.slug,
                 title: dbLand.title,
-                price: Number(dbLand.price),
-                area: Number(dbLand.area),
+                listedPrice: Number(dbLand.listed_price),
+                area: Number(dbLand.area_acres),
                 village: dbLand.village,
                 district: dbLand.district,
                 roadAccess: dbLand.road_access,
-                type: dbLand.type,
+                landType: dbLand.land_type,
                 images: primaryUrl ? [{ url: primaryUrl, isPrimary: true }] : []
               };
             });

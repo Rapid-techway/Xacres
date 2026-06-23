@@ -13,7 +13,7 @@ export default function SubLandDetails({ data }: SubLandDetailsProps) {
       <div className="space-y-3 pb-6 border-b border-gray-200">
         
         <h2 className="text-lg sm:text-xl font-semibold text-gray-900 leading-tight">
-          {data.type} land in {data.district}
+          {data.landType} land in {data.district}
         </h2>
 
         <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-gray-600">
@@ -62,7 +62,7 @@ export default function SubLandDetails({ data }: SubLandDetailsProps) {
               {data.area} Acres
             </p>
             <p className="text-[11px] text-gray-500">
-              {data.type}
+              {data.landType}
             </p>
           </div>
 
@@ -87,7 +87,7 @@ export default function SubLandDetails({ data }: SubLandDetailsProps) {
             </div>
 
             <p className="text-sm font-semibold text-gray-900">
-              {data.type}
+              {data.landType}
             </p>
             <p className="text-[11px] text-gray-500">
               Land type

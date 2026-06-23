@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react"
 import { useParams } from "next/navigation"
 import { Loader2 } from "lucide-react"
-import LandForm from "@/components/admin/LandForm"
+import LandForm from "@/components/admin/LandForm/LandFormRoot"
 import { landService } from "@/services/land.service"
 import { FlattenedLand } from "@/lib/types"
 
@@ -17,7 +17,7 @@ export default function EditLandPage() {
     try {
       setLoading(true)
       const fullData = await landService.getFullLandById(id)
-      
+
       // Flatten the data for the LandForm component
       const flattenedData: FlattenedLand = {
         ...fullData.land,
@@ -26,7 +26,7 @@ export default function EditLandPage() {
         id: fullData.land.$id,
         $id: fullData.land.$id
       }
-      
+
       setData(flattenedData)
     } catch (error) {
       console.error("Error fetching land:", error)

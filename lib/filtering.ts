@@ -18,8 +18,8 @@ export function filterLands(lands: Land[], filters: FilterParams): Land[] {
     }
 
     // 2. Price filter
-    if (filters.minPrice && land.price < filters.minPrice) return false;
-    if (filters.maxPrice && land.price > filters.maxPrice) return false;
+    if (filters.minPrice && land.listedPrice < filters.minPrice) return false;
+    if (filters.maxPrice && land.listedPrice > filters.maxPrice) return false;
 
     // 3. Size filter (Area/Size)
     if (filters.minSize && land.area < filters.minSize) return false;

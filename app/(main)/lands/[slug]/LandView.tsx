@@ -84,9 +84,9 @@ export default function LandView({ data }: LandViewProps) {
             <div className="sticky top-24">
               <PriceStickyCard
                 ref={cardRef}
-                price={data.price}
+                price={data.listedPrice}
                 area={data.area}
-                type={data.type}
+                type={data.landType}
                 title={data.title}
                 slug={data.slug}
                 landId={data.id || data.$id || ""}
@@ -97,7 +97,7 @@ export default function LandView({ data }: LandViewProps) {
       </div>
 
       <MobileBottomBar
-        price={data.price}
+        price={data.listedPrice}
         area={data.area}
         title={data.title}
         slug={data.slug}

@@ -16,7 +16,7 @@ export default function SubHeaderInfo({ data }: SubHeaderInfoProps) {
       slug: data.slug,
       district: data.district,
       village: data.village,
-      type: data.type
+      type: data.landType
     });
 
     if (isCopied) {

@@ -12,14 +12,21 @@ create table if not exists public.lands (
     id uuid default uuid_generate_v4() primary key,
     title text not null,
     slug text not null unique,
-    price numeric not null,
-    area numeric not null,
+    listed_price numeric not null,
+    area_acres numeric not null,
     district text not null,
     village text not null,
     latitude double precision not null,
     longitude double precision not null,
-    type text not null,
+    land_type text not null,
     road_access boolean not null default false,
+    road_width_m numeric,
+    approval_type varchar(50),
+    clu_category varchar(100),
+    municipal_limit_type varchar(50),
+    access_type varchar(50),
+    green_belt boolean default false,
+    green_belt_width_m numeric,
     description text,
     is_public boolean not null default false,
     created_at timestamp with time zone default timezone('utc'::text, now()) not null,
@@ -46,7 +53,7 @@ create table if not exists public.lands_admin (
     land_id uuid references public.lands(id) on delete cascade not null unique,
     contact_type varchar(20) default 'OWNER',
     owner_name text,
-    owner_phone text,
+    owner_phone_number varchar(20),
     expected_price numeric not null,
     minimum_price numeric not null,
     negotiable boolean not null default true,
@@ -66,15 +73,16 @@ create table if not exists public.lands_polygon (
 );
 
 -- =========================================================================
--- 5. Land Leads Table (Customer Inquiries)
+-- 5. Buyer Leads Table (Customer Inquiries)
 -- =========================================================================
-create table if not exists public.land_leads (
+create table if not exists public.buyer_leads (
     id uuid default uuid_generate_v4() primary key,
     land_id uuid references public.lands(id) on delete cascade not null,
     name text not null,
-    phone text not null,
-    note text,
-    budget text,
+    phone_number varchar(20) not null,
+    buyer_district text not null,
+    purchase_purpose text not null,
+    interested_district text not null,
     created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 
@@ -104,7 +112,7 @@ alter table public.lands enable row level security;
 alter table public.land_images enable row level security;
 alter table public.lands_admin enable row level security;
 alter table public.lands_polygon enable row level security;
-alter table public.land_leads enable row level security;
+alter table public.buyer_leads enable row level security;
 
 -- =========================================================================
 -- RLS Policies
@@ -161,15 +169,15 @@ using (true)
 with check (true);
 
 
--- --- Land Leads Policies ---
+-- --- Buyer Leads Policies ---
 -- 1. Public (anonymous) users can insert leads (submit the contact form)
-create policy "Allow public to insert leads"
-on public.land_leads for insert
+create policy "Allow public to insert buyer leads"
+on public.buyer_leads for insert
 with check (true);
 
 -- 2. Only Authenticated users (Admins) can read, update, or delete leads
-create policy "Allow admins full access to leads"
-on public.land_leads for all
+create policy "Allow admins full access to buyer leads"
+on public.buyer_leads for all
 to authenticated
 using (true)
 with check (true);
@@ -182,8 +190,8 @@ create table if not exists public.brokers (
     broker_code varchar(50) unique not null,
     name varchar(150) not null,
     office_name varchar(200),
-    mobile_number varchar(20) not null,
-    alternate_mobile_number varchar(20),
+    phone_number varchar(20) not null,
+    alternate_phone_number varchar(20),
     district varchar(100) not null,
     tehsil varchar(100) not null,
     address text,
@@ -222,3 +230,160 @@ with check (true);
 alter table public.lands add column if not exists broker_id uuid references public.brokers(id) on delete set null;
 alter table public.lands add column if not exists tehsil text;
 alter table public.lands add column if not exists listing_number bigint generated always as identity (start with 10000) unique;
+
+-- =========================================================================
+-- 8. Lands Table Schema Modification: Planning & Feasibility
+-- =========================================================================
+-- Rename area to area_acres if it exists under old name
+do $$
+begin
+  if exists (select 1 from information_schema.columns where table_schema = 'public' and table_name = 'lands' and column_name = 'area') then
+    alter table public.lands rename column area to area_acres;
+  end if;
+end $$;
+
+alter table public.lands add column if not exists road_width_m numeric;
+alter table public.lands add column if not exists approval_type varchar(50);
+alter table public.lands add column if not exists clu_category varchar(100);
+alter table public.lands add column if not exists municipal_limit_type varchar(50);
+alter table public.lands add column if not exists access_type varchar(50);
+alter table public.lands add column if not exists green_belt boolean default false;
+alter table public.lands add column if not exists green_belt_width_m numeric;
+
+-- =========================================================================
+-- 9. Column Renaming & Type Standardization Migrations
+-- =========================================================================
+-- This section migrates pre-existing databases to standardized naming conventions
+
+-- A. Lands Table (price -> listed_price, type -> land_type)
+do $$
+begin
+  if exists (select 1 from information_schema.columns where table_schema = 'public' and table_name = 'lands' and column_name = 'price') then
+    alter table public.lands rename column price to listed_price;
+  end if;
+
+  if exists (select 1 from information_schema.columns where table_schema = 'public' and table_name = 'lands' and column_name = 'type') then
+    alter table public.lands rename column type to land_type;
+  end if;
+end $$;
+
+-- B. Brokers Table (mobile_number -> phone_number, alternate_mobile_number -> alternate_phone_number)
+do $$
+begin
+  if exists (select 1 from information_schema.columns where table_schema = 'public' and table_name = 'brokers' and column_name = 'mobile_number') then
+    alter table public.brokers rename column mobile_number to phone_number;
+  end if;
+
+  if exists (select 1 from information_schema.columns where table_schema = 'public' and table_name = 'brokers' and column_name = 'alternate_mobile_number') then
+    alter table public.brokers rename column alternate_mobile_number to alternate_phone_number;
+  end if;
+
+  alter table public.brokers alter column phone_number type varchar(20);
+  alter table public.brokers alter column alternate_phone_number type varchar(20);
+end $$;
+
+-- C. Buyer Leads Table (phone -> phone_number, drop note/budget, add buyer_district/purchase_purpose/interested_district)
+do $$
+begin
+  if exists (select 1 from information_schema.columns where table_schema = 'public' and table_name = 'buyer_leads' and column_name = 'phone') then
+    alter table public.buyer_leads rename column phone to phone_number;
+  end if;
+
+  alter table public.buyer_leads alter column phone_number type varchar(20);
+
+  if exists (select 1 from information_schema.columns where table_schema = 'public' and table_name = 'buyer_leads' and column_name = 'note') then
+    alter table public.buyer_leads drop column note;
+  end if;
+
+  if exists (select 1 from information_schema.columns where table_schema = 'public' and table_name = 'buyer_leads' and column_name = 'budget') then
+    alter table public.buyer_leads drop column budget;
+  end if;
+
+  if not exists (select 1 from information_schema.columns where table_schema = 'public' and table_name = 'buyer_leads' and column_name = 'buyer_district') then
+    alter table public.buyer_leads add column buyer_district text not null default '';
+    alter table public.buyer_leads alter column buyer_district drop default;
+  end if;
+
+  if not exists (select 1 from information_schema.columns where table_schema = 'public' and table_name = 'buyer_leads' and column_name = 'purchase_purpose') then
+    alter table public.buyer_leads add column purchase_purpose text not null default '';
+    alter table public.buyer_leads alter column purchase_purpose drop default;
+  end if;
+
+  if not exists (select 1 from information_schema.columns where table_schema = 'public' and table_name = 'buyer_leads' and column_name = 'interested_district') then
+    alter table public.buyer_leads add column interested_district text not null default '';
+    alter table public.buyer_leads alter column interested_district drop default;
+  end if;
+end $$;
+
+-- D. Lands Admin Table (owner_phone -> owner_phone_number)
+do $$
+begin
+  if exists (select 1 from information_schema.columns where table_schema = 'public' and table_name = 'lands_admin' and column_name = 'owner_phone') then
+    alter table public.lands_admin rename column owner_phone to owner_phone_number;
+  end if;
+
+  alter table public.lands_admin alter column owner_phone_number type varchar(20);
+end $$;
+
+-- =========================================================================
+-- 10. Seller Leads & Images
+-- =========================================================================
+create table if not exists public.seller_leads (
+    id uuid default gen_random_uuid() primary key,
+    name varchar(150) not null,
+    phone_number varchar(20) not null,
+    district varchar(100) not null,
+    location_name varchar(150) not null,
+    notes text,
+    admin_notes text,
+    created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+create table if not exists public.seller_lead_images (
+    id uuid default gen_random_uuid() primary key,
+    seller_lead_id uuid references public.seller_leads(id) on delete cascade not null,
+    image_url text not null,
+    created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+alter table public.seller_leads enable row level security;
+alter table public.seller_lead_images enable row level security;
+
+create policy "Allow public to insert seller leads"
+on public.seller_leads for insert
+with check (true);
+
+create policy "Allow admins full access to seller leads"
+on public.seller_leads for all
+to authenticated
+using (true)
+with check (true);
+
+create policy "Allow admins full access to seller lead images"
+on public.seller_lead_images for all
+to authenticated
+using (true)
+with check (true);
+
+create policy "Allow public read-only of seller lead images"
+on public.seller_lead_images for select
+using (true);
+
+-- =========================================================================
+-- 11. Broker Images
+-- =========================================================================
+create table if not exists public.broker_images (
+    id uuid default gen_random_uuid() primary key,
+    broker_id uuid references public.brokers(id) on delete cascade not null,
+    image_url text not null,
+    created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+alter table public.broker_images enable row level security;
+
+create policy "Allow admins full access to broker images"
+on public.broker_images for all
+to authenticated
+using (true)
+with check (true);
+

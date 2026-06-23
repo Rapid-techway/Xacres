@@ -13,13 +13,13 @@ interface DbLand {
   id: string;
   title: string;
   slug: string;
-  price: number;
-  area: number;
+  listed_price: number;
+  area_acres: number;
   district: string;
   village: string;
   latitude: number;
   longitude: number;
-  type: string;
+  land_type: string;
   road_access: boolean;
   description?: string;
   is_public: boolean;
@@ -39,13 +39,13 @@ function mapDbLandToFrontend(dbLand: DbLand, images: DbImage[] = []): Land {
     $id: dbLand.id,
     title: dbLand.title,
     slug: dbLand.slug,
-    price: Number(dbLand.price),
-    area: Number(dbLand.area),
+    listedPrice: Number(dbLand.listed_price),
+    area: Number(dbLand.area_acres),
     district: dbLand.district,
     village: dbLand.village,
     latitude: dbLand.latitude,
     longitude: dbLand.longitude,
-    type: dbLand.type,
+    landType: dbLand.land_type,
     roadAccess: dbLand.road_access,
     description: dbLand.description || '',
     isPublic: dbLand.is_public,

@@ -97,7 +97,7 @@ export default function LandsPage() {
         }>
           {lands.map((land) => {
             const primaryImage = land.images.find(img => img.isPrimary)?.url || land.images[0]?.url || "https://images.unsplash.com/photo-1500382017468-9049fed747ef?auto=format&fit=crop&q=80&w=800";
-            const displayPrice = land.price || 0;
+            const displayPrice = land.listedPrice || 0;
             const status = land.isPublic ? "public" : "private";
 
             return (

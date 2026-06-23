@@ -12,22 +12,23 @@ import {
   Calendar, 
   MapPin, 
   ExternalLink, 
-  Wallet, 
-  FileText,
   Copy,
   Check,
-  RefreshCw
+  RefreshCw,
+  Plus
 } from "lucide-react"
 import { landService } from "@/services/land.service"
 import { Button } from "@/components/ui/button"
+import BuyerLeadSheet from "@/components/admin/BuyerLeadSheet"
 
 interface Lead {
   id: string
   land_id: string
   name: string
-  phone: string
-  note: string | null
-  budget: string | null
+  phoneNumber: string
+  buyerDistrict: string
+  purchasePurpose: string
+  interestedDistrict: string
   created_at: string
   lands: {
     title: string
@@ -41,9 +42,10 @@ interface DbLeadResponse {
   id: string
   land_id: string
   name: string
-  phone: string
-  note: string | null
-  budget: string | null
+  phone_number: string
+  buyer_district: string
+  purchase_purpose: string
+  interested_district: string
   created_at: string
   lands: {
     title: string
@@ -58,13 +60,14 @@ interface DbLeadResponse {
   }[] | null
 }
 
-export default function AdminLeadsPage() {
+export default function AdminBuyerLeadsPage() {
   const [leads, setLeads] = useState<Lead[]>([])
   const [filteredLeads, setFilteredLeads] = useState<Lead[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
   const [copiedId, setCopiedId] = useState<string | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
+  const [isCreateOpen, setIsCreateOpen] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
@@ -87,7 +90,7 @@ export default function AdminLeadsPage() {
   const fetchLeads = async () => {
     try {
       setLoading(true)
-      const data = await landService.getLeads()
+      const data = await landService.getBuyerLeads()
       // Map and cast to Lead structure
       const mapped = (data || []).map((item: DbLeadResponse) => {
         const rawLand = item.lands
@@ -97,9 +100,10 @@ export default function AdminLeadsPage() {
           id: item.id,
           land_id: item.land_id,
           name: item.name,
-          phone: item.phone,
-          note: item.note,
-          budget: item.budget,
+          phoneNumber: item.phone_number,
+          buyerDistrict: item.buyer_district,
+          purchasePurpose: item.purchase_purpose,
+          interestedDistrict: item.interested_district,
           created_at: item.created_at,
           lands: landObj ? {
             title: landObj.title,
@@ -128,14 +132,15 @@ export default function AdminLeadsPage() {
 
     const filtered = leads.filter(lead => {
       const nameMatch = lead.name.toLowerCase().includes(term)
-      const phoneMatch = lead.phone.toLowerCase().includes(term)
-      const noteMatch = lead.note?.toLowerCase().includes(term) || false
-      const budgetMatch = lead.budget?.toLowerCase().includes(term) || false
+      const phoneMatch = lead.phoneNumber.toLowerCase().includes(term)
+      const buyerDistrictMatch = lead.buyerDistrict.toLowerCase().includes(term)
+      const purchasePurposeMatch = lead.purchasePurpose.toLowerCase().includes(term)
+      const interestedDistrictMatch = lead.interestedDistrict.toLowerCase().includes(term)
       const landMatch = lead.lands?.title.toLowerCase().includes(term) || 
                         lead.lands?.district.toLowerCase().includes(term) || 
                         lead.lands?.village.toLowerCase().includes(term) || false
 
-      return nameMatch || phoneMatch || noteMatch || budgetMatch || landMatch
+      return nameMatch || phoneMatch || buyerDistrictMatch || purchasePurposeMatch || interestedDistrictMatch || landMatch
     })
     setFilteredLeads(filtered)
   }, [searchTerm, leads])
@@ -151,7 +156,7 @@ export default function AdminLeadsPage() {
     
     try {
       setDeletingId(id)
-      await landService.deleteLead(id)
+      await landService.deleteBuyerLead(id)
       setLeads(prev => prev.filter(l => l.id !== id))
     } catch (err) {
       console.error("Failed to delete lead:", err)
@@ -176,7 +181,7 @@ export default function AdminLeadsPage() {
     return (
       <div className="flex flex-col items-center justify-center p-32 space-y-4">
         <div className="w-8 h-8 rounded-full border-2 border-blue-600 border-t-transparent animate-spin"></div>
-        <p className="text-stone-400 font-bold uppercase tracking-widest text-[10px]">Loading leads pipeline...</p>
+        <p className="text-stone-400 font-bold uppercase tracking-widest text-[10px]">Loading buyer leads pipeline...</p>
       </div>
     )
   }
@@ -191,7 +196,7 @@ export default function AdminLeadsPage() {
             CRM Inbox
           </p>
           <h1 className="text-4xl font-sans font-bold tracking-tight text-stone-900">
-            Inquiries & Leads
+            Buyer Inquiries
           </h1>
           <p className="text-xs text-stone-500 font-medium tracking-[0.15px] mt-1">
             Review and follow up with potential buyers interested in your listings.
@@ -199,6 +204,13 @@ export default function AdminLeadsPage() {
         </div>
 
         <div className="flex items-center gap-3">
+          <Button
+            onClick={() => setIsCreateOpen(true)}
+            className="bg-[#292524] hover:bg-[#0c0a09] border border-[#292524] hover:border-blue-655/30 text-white font-semibold shadow-sm rounded-full px-5 h-9 text-xs uppercase tracking-widest gap-1.5 transition-all flex items-center cursor-pointer"
+          >
+            <Plus size={13} strokeWidth={2.5} />
+            Add Buyer Lead
+          </Button>
           <Button 
             onClick={fetchLeads} 
             variant="outline" 
@@ -238,7 +250,7 @@ export default function AdminLeadsPage() {
           <div className="space-y-1 sm:space-y-1.5 min-w-0">
             <span className="text-[8.5px] sm:text-[10px] font-bold text-stone-400 uppercase tracking-widest truncate block">Unique Contacts</span>
             <p className="text-xl sm:text-3xl font-sans font-bold text-stone-900 leading-none">
-              {new Set(leads.map(l => l.phone)).size}
+              {new Set(leads.map(l => l.phoneNumber)).size}
             </p>
           </div>
           <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-stone-50 border border-stone-200 flex items-center justify-center text-stone-700 shrink-0">
@@ -299,8 +311,9 @@ export default function AdminLeadsPage() {
                 <tr className="bg-[#fafafa] border-b border-[#e7e5e4]">
                   <th className="p-4 pl-6 text-[10px] font-bold text-stone-400 uppercase tracking-widest">Contact Detail</th>
                   <th className="p-4 text-[10px] font-bold text-stone-400 uppercase tracking-widest">Target Land Listing</th>
-                  <th className="p-4 text-[10px] font-bold text-stone-400 uppercase tracking-widest">Message & Notes</th>
-                  <th className="p-4 text-[10px] font-bold text-stone-400 uppercase tracking-widest">Budget Preference</th>
+                  <th className="p-4 text-[10px] font-bold text-stone-400 uppercase tracking-widest">Buyer Location</th>
+                  <th className="p-4 text-[10px] font-bold text-stone-400 uppercase tracking-widest">Intent / Purpose</th>
+                  <th className="p-4 text-[10px] font-bold text-stone-400 uppercase tracking-widest">Target District</th>
                   <th className="p-4 text-[10px] font-bold text-stone-400 uppercase tracking-widest">Received At</th>
                   <th className="p-4 pr-6 text-right text-[10px] font-bold text-stone-400 uppercase tracking-widest">Actions</th>
                 </tr>
@@ -319,9 +332,9 @@ export default function AdminLeadsPage() {
                             {lead.name}
                           </div>
                           <div className="text-[10px] text-stone-500 font-medium flex items-center gap-1.5 mt-0.5">
-                            <span>{lead.phone}</span>
+                            <span>{lead.phoneNumber}</span>
                             <button 
-                              onClick={() => handleCopy(lead.phone, lead.id)}
+                              onClick={() => handleCopy(lead.phoneNumber, lead.id)}
                               className="text-stone-400 hover:text-stone-600 transition"
                               title="Copy Phone Number"
                             >
@@ -354,30 +367,31 @@ export default function AdminLeadsPage() {
                       )}
                     </td>
 
-                    {/* Message Note */}
-                    <td className="p-4 max-w-[280px]">
-                      {lead.note ? (
-                        <div className="flex gap-2">
-                          <FileText size={13} className="text-stone-400 shrink-0 mt-0.5" />
-                          <p className="text-xs text-stone-600 leading-relaxed font-medium line-clamp-3">
-                            {lead.note}
-                          </p>
-                        </div>
-                      ) : (
-                        <span className="text-[10px] text-stone-300 font-medium italic">No message provided</span>
-                      )}
+                    {/* Buyer Location */}
+                    <td className="p-4">
+                      <span className="text-xs font-semibold text-stone-800">
+                        {lead.buyerDistrict}
+                      </span>
                     </td>
 
-                    {/* Budget preference */}
+                    {/* Intent / Purpose */}
                     <td className="p-4">
-                      {lead.budget ? (
-                        <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 bg-stone-100 text-stone-700 rounded-full text-[10px] font-semibold border border-stone-200/50">
-                          <Wallet size={10} className="text-stone-500" />
-                          {lead.budget}
-                        </div>
-                      ) : (
-                        <span className="text-xs text-stone-400 font-medium italic">Not specified</span>
-                      )}
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold border ${
+                        lead.purchasePurpose === 'Agriculture' 
+                          ? 'bg-emerald-50 text-emerald-700 border-emerald-100'
+                          : lead.purchasePurpose === 'Commercial'
+                          ? 'bg-blue-50 text-blue-700 border-blue-100'
+                          : 'bg-amber-50 text-amber-700 border-amber-100'
+                      }`}>
+                        {lead.purchasePurpose}
+                      </span>
+                    </td>
+
+                    {/* Target District */}
+                    <td className="p-4">
+                      <span className="text-xs font-semibold text-stone-850">
+                        {lead.interestedDistrict}
+                      </span>
                     </td>
 
                     {/* Created Date */}
@@ -389,7 +403,7 @@ export default function AdminLeadsPage() {
                     <td className="p-4 pr-6 text-right whitespace-nowrap">
                       <div className="flex items-center justify-end gap-1.5">
                         <a 
-                          href={`tel:${lead.phone}`}
+                          href={`tel:${lead.phoneNumber}`}
                           className="w-7 h-7 rounded-full border border-[#e7e5e4] bg-white flex items-center justify-center text-stone-600 hover:bg-stone-50 hover:text-stone-900 transition-all shadow-sm"
                           title="Call Lead"
                         >
@@ -413,6 +427,11 @@ export default function AdminLeadsPage() {
         )}
       </div>
 
+      <BuyerLeadSheet
+        open={isCreateOpen}
+        onOpenChange={setIsCreateOpen}
+        onSuccess={fetchLeads}
+      />
     </div>
   )
 }

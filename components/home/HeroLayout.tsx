@@ -22,7 +22,7 @@ export default function HeroLayout() {
       {/* 🌲 Background Image with dark left gradient overlay */}
       <div className="absolute inset-0 z-0">
         <Image
-          src="/images/land-hero.png"
+          src="/images/land-hero.webp"
           alt="Haryana Agricultural Land Sunset"
           fill
           priority

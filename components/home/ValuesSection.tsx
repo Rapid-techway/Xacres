@@ -79,12 +79,11 @@ export default function ValuesSection() {
             {/* Background image */}
             <div className="absolute inset-0 z-0">
               <Image
-                src="/images/bento-image.png"
+                src="/images/bento-image.webp"
                 alt="Real Area Visualization Aerial Sunset"
                 fill
                 sizes="(max-w-7xl) 100vw, 33vw"
                 className="object-cover object-center select-none transition-transform duration-700 group-hover:scale-[1.04]"
-                priority
               />
               {/* Overlay gradient to darken bottom for readability */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-black/10 z-10" />

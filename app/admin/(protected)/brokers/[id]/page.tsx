@@ -3,7 +3,8 @@
 import { useState, useEffect, useCallback } from "react"
 import { useParams } from "next/navigation"
 import Link from "next/link"
-import { ArrowLeft, Edit3, Phone, Briefcase, MapPin, Award, Calendar, ExternalLink, Loader2, Map } from "lucide-react"
+import Image from "next/image"
+import { ArrowLeft, Edit3, Phone, Briefcase, MapPin, Award, Calendar, ExternalLink, Loader2, Map, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { brokerService } from "@/services/broker.service"
 import { Broker, Land } from "@/lib/types"
@@ -15,6 +16,7 @@ export default function BrokerDetailsPage() {
   const [broker, setBroker] = useState<Broker | null>(null)
   const [lands, setLands] = useState<Land[]>([])
   const [loading, setLoading] = useState(true)
+  const [selectedEnlargedImage, setSelectedEnlargedImage] = useState<string | null>(null)
 
   const fetchBrokerDetails = useCallback(async () => {
     try {
@@ -154,12 +156,12 @@ export default function BrokerDetailsPage() {
                 <p className="text-[9px] font-bold text-stone-400 uppercase tracking-widest">Mobile Contact</p>
                 <p className="font-semibold text-stone-800 flex items-center gap-1.5">
                   <Phone size={12} className="text-stone-400" />
-                  {broker.mobileNumber}
+                  {broker.phoneNumber}
                 </p>
-                {broker.alternateMobileNumber && (
+                {broker.alternatePhoneNumber && (
                   <p className="font-semibold text-stone-850 flex items-center gap-1.5 pl-4.5 text-[11px]">
                     <span className="text-[9px] text-stone-400">Alt:</span>
-                    {broker.alternateMobileNumber}
+                    {broker.alternatePhoneNumber}
                   </p>
                 )}
               </div>
@@ -230,6 +232,31 @@ export default function BrokerDetailsPage() {
               </p>
             </div>
           )}
+
+          {/* Images Card */}
+          {broker.images && broker.images.length > 0 && (
+            <div className="bg-white rounded-2xl border border-stone-200/60 p-5 shadow-sm space-y-3">
+              <p className="text-[9px] font-bold text-stone-400 uppercase tracking-widest">Broker Gallery</p>
+              <div className="grid grid-cols-3 gap-2">
+                {broker.images.map((img, i) => (
+                  <div
+                    key={i}
+                    className="aspect-square rounded-xl overflow-hidden relative border border-stone-150 cursor-pointer bg-stone-50 hover:opacity-90 transition-opacity"
+                  >
+                    <Image
+                      src={img.imageUrl}
+                      alt={`Broker gallery image ${i + 1}`}
+                      fill
+                      unoptimized
+                      sizes="33vw"
+                      className="object-cover"
+                      onClick={() => setSelectedEnlargedImage(img.imageUrl)}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Right Column - Managed Lands Table (7 cols on desktop) */}
@@ -295,7 +322,7 @@ export default function BrokerDetailsPage() {
 
                         {/* Price */}
                         <td className="p-4 text-right font-extrabold text-stone-900 whitespace-nowrap">
-                          ₹{formatPrice(land.price)}
+                          ₹{formatPrice(land.listedPrice)}
                         </td>
 
                         {/* Area */}
@@ -335,6 +362,35 @@ export default function BrokerDetailsPage() {
         </div>
 
       </div>
+
+      {/* Lightbox Enlarged View Modal */}
+      {selectedEnlargedImage && (
+        <div
+          className="fixed inset-0 bg-black/75 z-[9999] flex items-center justify-center animate-in fade-in duration-200 backdrop-blur-xs"
+          onClick={() => setSelectedEnlargedImage(null)}
+        >
+          <div className="relative max-w-4xl max-h-[85vh] p-4 flex items-center justify-center">
+            {/* Close button */}
+            <button
+              type="button"
+              onClick={() => setSelectedEnlargedImage(null)}
+              className="absolute -top-10 right-2 p-2 bg-stone-900/80 text-white rounded-full hover:bg-stone-950 hover:scale-105 transition-all z-[10000] cursor-pointer"
+            >
+              <X size={16} />
+            </button>
+            <div className="relative" onClick={(e) => e.stopPropagation()}>
+              <Image
+                src={selectedEnlargedImage}
+                alt="Enlarged view"
+                width={800}
+                height={600}
+                unoptimized
+                className="object-contain rounded-lg max-h-[80vh] w-auto max-w-full shadow-2xl"
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

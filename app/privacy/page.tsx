@@ -1,4 +1,4 @@
-import { Footer1 } from "@/components/home/footer1";
+import { Footer1 } from "@/components/home/footer";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 

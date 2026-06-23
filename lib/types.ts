@@ -8,13 +8,13 @@ export interface Land {
   id?: string;
   title: string;
   slug: string;
-  price: number;
+  listedPrice: number;
   area: number;
   district: string;
   village: string;
   latitude: number;
   longitude: number;
-  type: string;
+  landType: string;
   roadAccess: boolean;
   images: LandImage[];
   description: string;
@@ -24,6 +24,13 @@ export interface Land {
   brokerId?: string | null;
   tehsil?: string | null;
   listingNumber?: number | null;
+  roadWidthM?: number | null;
+  approvalType?: string | null;
+  cluCategory?: string | null;
+  municipalLimitType?: string | null;
+  accessType?: string | null;
+  greenBelt?: boolean;
+  greenBeltWidthM?: number | null;
 }
 
 export interface LandAdmin {
@@ -32,7 +39,7 @@ export interface LandAdmin {
   landId: string;
   contactType: 'OWNER' | 'BROKER';
   ownerName?: string | null;
-  ownerPhone?: string | null;
+  ownerPhoneNumber?: string | null;
   expectedPrice: number;
   minimumPrice: number;
   negotiable: boolean;
@@ -51,7 +58,7 @@ export interface LandPolygon {
 export interface FlattenedLand extends Land {
   contactType?: 'OWNER' | 'BROKER';
   ownerName?: string | null;
-  ownerPhone?: string | null;
+  ownerPhoneNumber?: string | null;
   expectedPrice?: number;
   minimumPrice?: number;
   negotiable?: boolean;
@@ -60,14 +67,21 @@ export interface FlattenedLand extends Land {
   broker?: Broker;
 }
 
+export interface BrokerImage {
+  id?: string;
+  brokerId?: string;
+  imageUrl: string;
+  createdAt?: string;
+}
+
 export interface Broker {
   id?: string;
   $id?: string;
   brokerCode: string;
   name: string;
   officeName?: string;
-  mobileNumber: string;
-  alternateMobileNumber?: string;
+  phoneNumber: string;
+  alternatePhoneNumber?: string;
   district: string;
   tehsil: string;
   address?: string;
@@ -79,6 +93,7 @@ export interface Broker {
   createdAt?: string;
   updatedAt?: string;
   totalLands?: number;
+  images?: BrokerImage[];
 }
 
 export interface CreateFullLandPayload {
@@ -177,3 +192,22 @@ export const EXAMPLE_GEOJSON: GeoJsonFeatureCollection = {
     }
   ]
 };
+
+export interface SellerLead {
+  id?: string;
+  name: string;
+  phoneNumber: string;
+  district: string;
+  locationName: string;
+  notes?: string;
+  adminNotes?: string;
+  createdAt?: string;
+  images?: SellerLeadImage[];
+}
+
+export interface SellerLeadImage {
+  id?: string;
+  sellerLeadId?: string;
+  imageUrl: string;
+  createdAt?: string;
+}

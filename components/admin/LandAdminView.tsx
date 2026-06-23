@@ -58,9 +58,9 @@ export default function LandAdminView({ data }: LandAdminViewProps) {
         </div>
 
         <PriceStickyCard
-          price={data.price}
+          price={data.listedPrice}
           area={data.area}
-          type={data.type} 
+          type={data.landType} 
           title={data.title} 
           slug={data.slug}
           landId={data.id || data.$id || ""}
@@ -157,7 +157,7 @@ export default function LandAdminView({ data }: LandAdminViewProps) {
               <p className="text-[9px] font-bold text-blue-650 uppercase tracking-widest">Contact</p>
             </div>
             <p className="text-sm font-semibold text-stone-900 truncate">
-              {data.contactType === 'BROKER' ? (data.broker?.mobileNumber || "N/A") : (data.ownerPhone || "N/A")}
+              {data.contactType === 'BROKER' ? (data.broker?.phoneNumber || "N/A") : (data.ownerPhoneNumber || "N/A")}
             </p>
           </div>
         </div>
@@ -186,7 +186,7 @@ export default function LandAdminView({ data }: LandAdminViewProps) {
               <p className="text-[9px] font-bold text-stone-400 uppercase tracking-widest mb-0.5">Contact Number</p>
               <p className="font-semibold text-stone-850 flex items-center sm:justify-end gap-1.5">
                 <Phone size={12} className="text-stone-450" />
-                {data.broker.mobileNumber}
+                {data.broker.phoneNumber}
               </p>
             </div>
           </div>

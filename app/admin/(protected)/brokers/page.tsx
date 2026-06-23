@@ -299,7 +299,7 @@ export default function BrokersPage() {
                       {/* Mobile */}
                       <td className="p-4 text-stone-700 font-semibold flex items-center gap-1.5 mt-3 border-none">
                         <Phone size={11} className="text-stone-400" />
-                        {broker.mobileNumber}
+                        {broker.phoneNumber}
                       </td>
 
                       {/* Total Lands */}

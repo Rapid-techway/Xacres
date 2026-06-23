@@ -5,13 +5,13 @@ interface DbLand {
   id: string;
   title: string;
   slug: string;
-  price: number;
-  area: number;
+  listed_price: number;
+  area_acres: number;
   district: string;
   village: string;
   latitude: number;
   longitude: number;
-  type: string;
+  land_type: string;
   road_access: boolean;
   description?: string;
   is_public: boolean;
@@ -20,6 +20,13 @@ interface DbLand {
   broker_id?: string | null;
   tehsil?: string | null;
   listing_number?: number;
+  road_width_m?: number | null;
+  approval_type?: string | null;
+  clu_category?: string | null;
+  municipal_limit_type?: string | null;
+  access_type?: string | null;
+  green_belt?: boolean;
+  green_belt_width_m?: number | null;
 }
 
 interface DbImage {
@@ -33,7 +40,7 @@ interface DbAdmin {
   land_id?: string;
   contact_type?: string;
   owner_name?: string | null;
-  owner_phone?: string | null;
+  owner_phone_number?: string | null;
   expected_price?: number;
   minimum_price?: number;
   negotiable?: boolean;
@@ -58,13 +65,13 @@ function mapDbLandToFrontend(
     $id: dbLand.id,
     title: dbLand.title,
     slug: dbLand.slug,
-    price: Number(dbLand.price),
-    area: Number(dbLand.area),
+    listedPrice: Number(dbLand.listed_price),
+    area: Number(dbLand.area_acres),
     district: dbLand.district,
     village: dbLand.village,
     latitude: dbLand.latitude,
     longitude: dbLand.longitude,
-    type: dbLand.type,
+    landType: dbLand.land_type,
     roadAccess: dbLand.road_access,
     description: dbLand.description || '',
     isPublic: dbLand.is_public,
@@ -73,6 +80,13 @@ function mapDbLandToFrontend(
     brokerId: dbLand.broker_id || null,
     tehsil: dbLand.tehsil || null,
     listingNumber: dbLand.listing_number ? Number(dbLand.listing_number) : null,
+    roadWidthM: dbLand.road_width_m ? Number(dbLand.road_width_m) : null,
+    approvalType: dbLand.approval_type || '',
+    cluCategory: dbLand.clu_category || '',
+    municipalLimitType: dbLand.municipal_limit_type || '',
+    accessType: dbLand.access_type || '',
+    greenBelt: !!dbLand.green_belt,
+    greenBeltWidthM: dbLand.green_belt_width_m ? Number(dbLand.green_belt_width_m) : null,
     images: images.map(img => ({
       url: img.url,
       isPrimary: !!(img.is_primary ?? img.isPrimary)
@@ -80,7 +94,7 @@ function mapDbLandToFrontend(
     // Private Admin fields (if loaded)
     contactType: (adminData?.contact_type || 'OWNER') as 'OWNER' | 'BROKER',
     ownerName: adminData?.owner_name || '',
-    ownerPhone: adminData?.owner_phone || '',
+    ownerPhoneNumber: adminData?.owner_phone_number || '',
     expectedPrice: adminData ? Number(adminData.expected_price) : undefined,
     minimumPrice: adminData ? Number(adminData.minimum_price) : undefined,
     negotiable: adminData?.negotiable ?? true,
@@ -103,18 +117,25 @@ export const landService = {
         .insert({
           title: data.title || 'Draft Land Listing',
           slug: tempSlug,
-          price: data.price,
-          area: data.area,
+          listed_price: data.listedPrice,
+          area_acres: data.area,
           district: data.district,
           tehsil: data.tehsil || null,
           village: data.village,
           latitude: data.latitude,
           longitude: data.longitude,
-          type: data.type,
+          land_type: data.landType,
           road_access: data.roadAccess,
           description: data.description,
           is_public: data.isPublic,
-          broker_id: data.brokerId || null
+          broker_id: data.brokerId || null,
+          road_width_m: data.roadWidthM || null,
+          approval_type: data.approvalType || null,
+          clu_category: data.cluCategory || null,
+          municipal_limit_type: data.municipalLimitType || null,
+          access_type: data.accessType || null,
+          green_belt: data.greenBelt ?? false,
+          green_belt_width_m: data.greenBeltWidthM || null
         })
         .select()
         .single();
@@ -177,7 +198,7 @@ export const landService = {
           land_id: data.landId,
           contact_type: data.contactType || 'OWNER',
           owner_name: data.contactType === 'OWNER' ? data.ownerName : null,
-          owner_phone: data.contactType === 'OWNER' ? data.ownerPhone : null,
+          owner_phone_number: data.contactType === 'OWNER' ? data.ownerPhoneNumber : null,
           expected_price: data.expectedPrice,
           minimum_price: data.minimumPrice,
           negotiable: data.negotiable,
@@ -194,7 +215,7 @@ export const landService = {
         landId: inserted.land_id,
         contactType: (inserted.contact_type || 'OWNER') as 'OWNER' | 'BROKER',
         ownerName: inserted.owner_name || '',
-        ownerPhone: inserted.owner_phone || '',
+        ownerPhoneNumber: inserted.owner_phone_number || '',
         expectedPrice: Number(inserted.expected_price),
         minimumPrice: Number(inserted.minimum_price),
         negotiable: inserted.negotiable,
@@ -247,18 +268,25 @@ export const landService = {
       const payload: Record<string, unknown> = {};
       if (data.title !== undefined) payload.title = data.title;
       if (data.slug !== undefined) payload.slug = data.slug;
-      if (data.price !== undefined) payload.price = data.price;
-      if (data.area !== undefined) payload.area = data.area;
+      if (data.listedPrice !== undefined) payload.listed_price = data.listedPrice;
+      if (data.area !== undefined) payload.area_acres = data.area;
       if (data.district !== undefined) payload.district = data.district;
       if (data.village !== undefined) payload.village = data.village;
       if (data.latitude !== undefined) payload.latitude = data.latitude;
       if (data.longitude !== undefined) payload.longitude = data.longitude;
-      if (data.type !== undefined) payload.type = data.type;
+      if (data.landType !== undefined) payload.land_type = data.landType;
       if (data.roadAccess !== undefined) payload.road_access = data.roadAccess;
       if (data.description !== undefined) payload.description = data.description;
       if (data.isPublic !== undefined) payload.is_public = data.isPublic;
       if (data.brokerId !== undefined) payload.broker_id = data.brokerId;
       if (data.tehsil !== undefined) payload.tehsil = data.tehsil;
+      if (data.roadWidthM !== undefined) payload.road_width_m = data.roadWidthM;
+      if (data.approvalType !== undefined) payload.approval_type = data.approvalType;
+      if (data.cluCategory !== undefined) payload.clu_category = data.cluCategory;
+      if (data.municipalLimitType !== undefined) payload.municipal_limit_type = data.municipalLimitType;
+      if (data.accessType !== undefined) payload.access_type = data.accessType;
+      if (data.greenBelt !== undefined) payload.green_belt = data.greenBelt;
+      if (data.greenBeltWidthM !== undefined) payload.green_belt_width_m = data.greenBeltWidthM;
 
       const { data: updated, error } = await supabase
         .from('lands')
@@ -299,14 +327,14 @@ export const landService = {
         payload.contact_type = data.contactType;
         if (data.contactType === 'BROKER') {
           payload.owner_name = null;
-          payload.owner_phone = null;
+          payload.owner_phone_number = null;
         } else {
           if (data.ownerName !== undefined) payload.owner_name = data.ownerName;
-          if (data.ownerPhone !== undefined) payload.owner_phone = data.ownerPhone;
+          if (data.ownerPhoneNumber !== undefined) payload.owner_phone_number = data.ownerPhoneNumber;
         }
       } else {
         if (data.ownerName !== undefined) payload.owner_name = data.ownerName;
-        if (data.ownerPhone !== undefined) payload.owner_phone = data.ownerPhone;
+        if (data.ownerPhoneNumber !== undefined) payload.owner_phone_number = data.ownerPhoneNumber;
       }
       if (data.expectedPrice !== undefined) payload.expected_price = data.expectedPrice;
       if (data.minimumPrice !== undefined) payload.minimum_price = data.minimumPrice;
@@ -331,7 +359,7 @@ export const landService = {
         landId: updated.land_id,
         contactType: (updated.contact_type || 'OWNER') as 'OWNER' | 'BROKER',
         ownerName: updated.owner_name || '',
-        ownerPhone: updated.owner_phone || '',
+        ownerPhoneNumber: updated.owner_phone_number || '',
         expectedPrice: Number(updated.expected_price),
         minimumPrice: Number(updated.minimum_price),
         negotiable: updated.negotiable,
@@ -449,13 +477,11 @@ export const landService = {
     }
   },
 
-  /**
-   * Upload a file to Cloudflare R2
-   */
-  async uploadFile(file: File) {
+  async uploadFile(file: File, folder: 'lands' | 'seller-leads' | 'brokers' = 'lands') {
     try {
       const formData = new FormData();
       formData.append('file', file);
+      formData.append('folder', folder);
 
       // Search for Supabase session token in localStorage for authentication validation
       let token = '';
@@ -606,7 +632,7 @@ export const landService = {
           landId: adminRes.data.land_id,
           contactType: (adminRes.data.contact_type || 'OWNER') as 'OWNER' | 'BROKER',
           ownerName: adminRes.data.owner_name || '',
-          ownerPhone: adminRes.data.owner_phone || '',
+          ownerPhoneNumber: adminRes.data.owner_phone_number || '',
           expectedPrice: Number(adminRes.data.expected_price),
           minimumPrice: Number(adminRes.data.minimum_price),
           negotiable: adminRes.data.negotiable,
@@ -636,8 +662,8 @@ export const landService = {
         supabase.from('lands').select('id', { count: 'exact', head: true }),
         supabase.from('lands').select('id', { count: 'exact', head: true }).eq('is_public', true),
         supabase.from('lands').select('*').order('created_at', { ascending: false }).limit(4),
-        supabase.from('land_leads').select('id', { count: 'exact', head: true }),
-        supabase.from('land_leads').select('id, name, phone, budget, created_at, lands(title)').order('created_at', { ascending: false }).limit(4)
+        supabase.from('buyer_leads').select('id', { count: 'exact', head: true }),
+        supabase.from('buyer_leads').select('id, name, phone_number, purchase_purpose, created_at, lands(title)').order('created_at', { ascending: false }).limit(4)
       ]);
 
       const total = totalRes.count || 0;
@@ -736,17 +762,18 @@ export const landService = {
   /**
    * Fetch all lead submissions (for admin view)
    */
-  async getLeads() {
+  async getBuyerLeads() {
     try {
       const { data, error } = await supabase
-        .from('land_leads')
+        .from('buyer_leads')
         .select(`
           id,
           land_id,
           name,
-          phone,
-          note,
-          budget,
+          phone_number,
+          buyer_district,
+          purchase_purpose,
+          interested_district,
           created_at,
           lands (
             title,
@@ -768,10 +795,10 @@ export const landService = {
   /**
    * Delete a lead submission
    */
-  async deleteLead(id: string) {
+  async deleteBuyerLead(id: string) {
     try {
       const { error } = await supabase
-        .from('land_leads')
+        .from('buyer_leads')
         .delete()
         .eq('id', id);
 

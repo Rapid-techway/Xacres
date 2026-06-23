@@ -3,13 +3,15 @@
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
-import { ArrowLeft, Check, Award, Briefcase, Phone, MapPin, Loader2, Building, ChevronDown } from "lucide-react"
+import Image from "next/image"
+import { ArrowLeft, Check, Award, Briefcase, Phone, MapPin, Loader2, Building, ChevronDown, Trash2, FileImage, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import DistrictDropdown from "./DistrictDropdown"
 import { brokerService } from "@/services/broker.service"
+import { landService } from "@/services/land.service"
 import { Broker } from "@/lib/types"
 import { HARYANA_TEHSILS } from "@/lib/static"
 
@@ -20,8 +22,8 @@ interface BrokerFormProps {
 interface FullBrokerFormData {
   name: string
   officeName: string
-  mobileNumber: string
-  alternateMobileNumber: string
+  phoneNumber: string
+  alternatePhoneNumber: string
   district: string
   tehsil: string
   address: string
@@ -30,6 +32,7 @@ interface FullBrokerFormData {
   referredBy: string
   reputation: 'SILVER' | 'GOLD' | 'DIAMOND'
   description: string
+  images: { id?: string; brokerId?: string; imageUrl: string; createdAt?: string }[]
 }
 
 export default function BrokerForm({ initialData = null }: BrokerFormProps) {
@@ -43,8 +46,8 @@ export default function BrokerForm({ initialData = null }: BrokerFormProps) {
   const [formData, setFormData] = useState<FullBrokerFormData>({
     name: initialData?.name || "",
     officeName: initialData?.officeName || "",
-    mobileNumber: initialData?.mobileNumber || "",
-    alternateMobileNumber: initialData?.alternateMobileNumber || "",
+    phoneNumber: initialData?.phoneNumber || "",
+    alternatePhoneNumber: initialData?.alternatePhoneNumber || "",
     district: initialData?.district || "",
     tehsil: initialData?.tehsil || "",
     address: initialData?.address || "",
@@ -52,7 +55,8 @@ export default function BrokerForm({ initialData = null }: BrokerFormProps) {
     experienceYears: initialData?.experienceYears || 0,
     referredBy: initialData?.referredBy || "",
     reputation: initialData?.reputation || "SILVER",
-    description: initialData?.description || ""
+    description: initialData?.description || "",
+    images: initialData?.images || []
   })
 
   const availableTehsils = formData.district ? HARYANA_TEHSILS[formData.district] || [] : []
@@ -85,9 +89,69 @@ export default function BrokerForm({ initialData = null }: BrokerFormProps) {
     }
   }, [formDistrict, formTehsil, formReputation, isEdit, initialData])
 
-  const handleChange = (field: keyof FullBrokerFormData, value: string | number) => {
+  const handleChange = <K extends keyof FullBrokerFormData>(field: K, value: FullBrokerFormData[K]) => {
     setFormData(prev => ({ ...prev, [field]: value }))
   }
+
+  const [uploading, setUploading] = useState(false)
+  const [isDragging, setIsDragging] = useState(false)
+  const [selectedEnlargedImage, setSelectedEnlargedImage] = useState<string | null>(null)
+
+  const uploadFiles = async (files: FileList | File[]) => {
+    if (!files || files.length === 0) return;
+
+    setUploading(true);
+    const newImages = [...formData.images];
+
+    try {
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        const uploadedFile = await landService.uploadFile(file, "brokers");
+        const imageUrl = await landService.getFileView(uploadedFile.$id);
+
+        newImages.push({
+          imageUrl
+        });
+      }
+      setFormData(prev => ({ ...prev, images: newImages }));
+    } catch (error) {
+      console.error("Image upload failed:", error);
+      alert("Failed to upload images. Please try again.");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files) {
+      uploadFiles(files);
+      e.target.value = '';
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = () => {
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const files = e.dataTransfer.files;
+    uploadFiles(files);
+  };
+
+  const removeImage = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      images: prev.images.filter((_, i) => i !== index)
+    }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -97,8 +161,8 @@ export default function BrokerForm({ initialData = null }: BrokerFormProps) {
       alert("Broker Name is required.")
       return
     }
-    if (!formData.mobileNumber.trim()) {
-      alert("Mobile Number is required.")
+    if (!formData.phoneNumber.trim()) {
+      alert("Phone Number is required.")
       return
     }
     if (!formData.district.trim()) {
@@ -215,18 +279,18 @@ export default function BrokerForm({ initialData = null }: BrokerFormProps) {
                 </div>
               </div>
 
-              {/* Mobile and Alternate Mobile */}
+              {/* Phone and Alternate Phone */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
                   <Label className="text-[10px] font-bold text-stone-500 uppercase tracking-wider ml-0.5">
-                    Mobile Number <span className="text-red-500">*</span>
+                    Phone Number <span className="text-red-500">*</span>
                   </Label>
                   <div className="relative">
-                    <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-450"><Phone size={13} /></span>
+                    <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-455"><Phone size={13} /></span>
                     <Input
                       placeholder="e.g. 98120XXXXX"
-                      value={formData.mobileNumber}
-                      onChange={(e) => handleChange("mobileNumber", e.target.value)}
+                      value={formData.phoneNumber}
+                      onChange={(e) => handleChange("phoneNumber", e.target.value)}
                       className="h-11 pl-9 pr-4 bg-stone-50/40 border-stone-200 rounded-xl focus:border-emerald-600 focus:bg-white focus:ring-emerald-500/10 transition-all font-semibold text-stone-900 text-sm placeholder:text-stone-400/60"
                     />
                   </div>
@@ -234,14 +298,14 @@ export default function BrokerForm({ initialData = null }: BrokerFormProps) {
 
                 <div className="space-y-1.5">
                   <Label className="text-[10px] font-bold text-stone-500 uppercase tracking-wider ml-0.5">
-                    Alternate Mobile
+                    Alternate Phone
                   </Label>
                   <div className="relative">
-                    <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-450"><Phone size={13} /></span>
+                    <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-stone-455"><Phone size={13} /></span>
                     <Input
                       placeholder="e.g. 94160XXXXX"
-                      value={formData.alternateMobileNumber}
-                      onChange={(e) => handleChange("alternateMobileNumber", e.target.value)}
+                      value={formData.alternatePhoneNumber}
+                      onChange={(e) => handleChange("alternatePhoneNumber", e.target.value)}
                       className="h-11 pl-9 pr-4 bg-stone-50/40 border-stone-200 rounded-xl focus:border-emerald-600 focus:bg-white focus:ring-emerald-500/10 transition-all font-semibold text-stone-900 text-sm placeholder:text-stone-400/60"
                     />
                   </div>
@@ -402,6 +466,100 @@ export default function BrokerForm({ initialData = null }: BrokerFormProps) {
         </div>
       </div>
 
+      {/* Card 3: Broker Images (Visual Assets) */}
+      <div className="bg-white rounded-2xl border border-stone-200/60 p-6 md:p-8 shadow-sm space-y-6">
+        <div className="flex items-center gap-3 border-b border-stone-100 pb-4 mb-4">
+          <div className="w-9 h-9 rounded-xl bg-orange-50 text-orange-655 flex items-center justify-center border border-orange-100/40">
+            <FileImage size={16} />
+          </div>
+          <div>
+            <h3 className="text-xs font-black text-stone-800 uppercase tracking-widest leading-none">Broker Images</h3>
+            <p className="text-[10px] text-stone-405 font-bold mt-1 uppercase tracking-wider">Upload profile, office, team, or license photos</p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 items-start">
+          {/* Left Column: Drag & Drop Container */}
+          <div className="md:col-span-1">
+            <div
+              className={`aspect-video md:aspect-square w-full rounded-2xl border-2 border-dashed flex flex-col items-center justify-center group transition-all duration-200 cursor-pointer overflow-hidden ${
+                isDragging
+                  ? 'border-emerald-500 bg-emerald-50/10'
+                  : 'border-stone-200 bg-stone-50/30 hover:bg-white hover:border-emerald-500/60'
+              }`}
+              onClick={() => !uploading && (document.getElementById('brokerImageUpload') as HTMLInputElement)?.click()}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+            >
+              {uploading ? (
+                <div className="flex flex-col items-center gap-1.5 p-2 text-center">
+                  <Loader2 className="w-5 h-5 text-emerald-600 animate-spin" />
+                  <p className="text-[9px] font-bold text-stone-500 uppercase tracking-widest animate-pulse">Uploading...</p>
+                </div>
+              ) : (
+                <div className="text-center p-2">
+                  <div className="w-7 h-7 rounded-lg bg-white shadow-xs border border-stone-150 flex items-center justify-center mx-auto text-stone-500 group-hover:scale-105 group-hover:text-emerald-600 transition-all mb-1.5">
+                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                    </svg>
+                  </div>
+                  <p className="font-extrabold text-stone-850 text-[10px] leading-tight">Drag & drop</p>
+                  <p className="text-[8px] text-stone-400 font-bold uppercase tracking-wider mt-0.5 leading-tight">or browse</p>
+                </div>
+              )}
+            </div>
+          </div>
+          
+          <input
+            type="file"
+            id="brokerImageUpload"
+            className="hidden"
+            multiple
+            accept="image/*"
+            onChange={handleImageUpload}
+            disabled={uploading}
+          />
+
+          {/* Right Column: Uploaded Images Grid */}
+          <div className="md:col-span-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
+              {formData.images.map((img, i) => (
+                <div
+                  key={i}
+                  className="aspect-square rounded-xl overflow-hidden group relative border border-stone-200 bg-stone-50/50 shadow-xs"
+                >
+                  <Image
+                    src={img.imageUrl}
+                    alt={`Broker photo ${i + 1}`}
+                    fill
+                    unoptimized
+                    sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 20vw"
+                    className="object-cover cursor-pointer hover:scale-105 transition-transform duration-300"
+                    onClick={() => setSelectedEnlargedImage(img.imageUrl)}
+                  />
+
+                  {/* Delete action overlay */}
+                  <button
+                    type="button"
+                    onClick={() => removeImage(i)}
+                    className="absolute top-1.5 right-1.5 p-1.5 bg-black/60 hover:bg-red-650 rounded-lg text-white opacity-0 group-hover:opacity-100 transition-opacity z-10 cursor-pointer shadow-xs"
+                  >
+                    <Trash2 size={11} strokeWidth={2.5} />
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            {formData.images.length === 0 && (
+              <div className="h-24 flex items-center justify-center border border-dashed border-stone-200 bg-stone-50/10 rounded-2xl p-4 text-center">
+                <p className="text-[10px] font-bold text-stone-400 uppercase tracking-widest leading-none">No images uploaded yet</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
       {/* Action Buttons */}
       <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-stone-200/60">
         <button
@@ -422,6 +580,35 @@ export default function BrokerForm({ initialData = null }: BrokerFormProps) {
           {!loading && <Check size={13} strokeWidth={2.0} />}
         </Button>
       </div>
+
+      {/* Lightbox Enlarged View Modal */}
+      {selectedEnlargedImage && (
+        <div
+          className="fixed inset-0 bg-black/75 z-[9999] flex items-center justify-center animate-in fade-in duration-200 backdrop-blur-xs"
+          onClick={() => setSelectedEnlargedImage(null)}
+        >
+          <div className="relative max-w-4xl max-h-[85vh] p-4 flex items-center justify-center">
+            {/* Close button */}
+            <button
+              type="button"
+              onClick={() => setSelectedEnlargedImage(null)}
+              className="absolute -top-10 right-2 p-2 bg-stone-900/80 text-white rounded-full hover:bg-stone-950 hover:scale-105 transition-all z-[10000] cursor-pointer"
+            >
+              <X size={16} />
+            </button>
+            <div className="relative" onClick={(e) => e.stopPropagation()}>
+              <Image
+                src={selectedEnlargedImage}
+                alt="Enlarged view"
+                width={800}
+                height={600}
+                unoptimized
+                className="object-contain rounded-lg max-h-[80vh] w-auto max-w-full shadow-2xl"
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </form>
   )
 }

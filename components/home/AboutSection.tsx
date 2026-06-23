@@ -99,12 +99,11 @@ export default function AboutSection() {
             {/* Haryana globe image background */}
             <div className="absolute inset-0 z-0">
               <Image
-                src="/images/world-haryana.png"
+                src="/images/world-haryana.webp"
                 alt="Haryana World Connection View"
                 fill
                 sizes="(max-w-7xl) 100vw, 50vw"
                 className="object-cover object-center select-none transition-transform duration-700 group-hover:scale-102"
-                priority
               />
               {/* Radial gradient overlay to darken borders */}
               <div className="absolute inset-0 bg-gradient-to-t from-black via-black/25 to-black/20 z-10" />

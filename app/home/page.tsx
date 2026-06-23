@@ -5,7 +5,7 @@ import MapSection from '@/components/home/MapSection';
 import AboutSection from '@/components/home/AboutSection';
 import ValuesSection from '@/components/home/ValuesSection';
 import FaqSection from '@/components/home/FaqSection';
-import { Footer1 } from '@/components/home/footer1';
+import { Footer1 } from '@/components/home/footer';
 
 export const metadata: Metadata = {
   title: 'Xacres - Direct, Verified & Hassle-free Land in Haryana',

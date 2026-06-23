@@ -75,8 +75,8 @@ export default function LandDetailView({ land, onClose }: LandDetailViewProps) {
           </div>
 
           <div className="flex items-center flex-wrap gap-1 text-[15px] font-semibold text-gray-900">
-            <span>₹ {formatPrice(land.price / land.area)} /acre</span>
-            <span className="text-gray-400 font-medium"> (Total - {formatPrice(land.price)})</span>
+            <span>₹ {formatPrice(land.listedPrice / land.area)} /acre</span>
+            <span className="text-gray-400 font-medium"> (Total - {formatPrice(land.listedPrice)})</span>
           </div>
         </div>
 
@@ -139,7 +139,7 @@ export default function LandDetailView({ land, onClose }: LandDetailViewProps) {
             {/* Subtle Type Tag */}
             <div className="absolute top-4 left-4">
               <span className="px-3 py-1 bg-black/40 backdrop-blur-md text-[10px] font-bold text-white uppercase tracking-widest rounded-full border border-white/10 shadow-sm">
-                {land.type}
+                {land.landType}
               </span>
             </div>
           </div>
@@ -154,7 +154,7 @@ export default function LandDetailView({ land, onClose }: LandDetailViewProps) {
                 slug: land.slug,
                 district: land.district,
                 village: land.village,
-                type: land.type
+                type: land.landType
               });
             }}
             className="flex items-center justify-center w-11 h-11 rounded-2xl border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 shadow-sm transition-all active:scale-95 group"

@@ -64,10 +64,10 @@ export default function LandCard({ land }: LandCardProps) {
         <div className="space-y-1.5">
           <div className="flex justify-between items-baseline">
             <h3 className="text-2xl font-sans font-semibold text-stone-900 tracking-tight leading-none">
-              ₹ {formatPrice(land.price)}
+              ₹ {formatPrice(land.listedPrice)}
             </h3>
             <span className="text-[13px] font-bold text-blue-600 tracking-wide shrink-0">
-              ₹ {formatPrice(Math.round(land.price / land.area))}/ac
+              ₹ {formatPrice(Math.round(land.listedPrice / land.area))}/ac
             </span>
           </div>
           <p className="text-[11px] font-bold text-stone-400 uppercase tracking-wider">
@@ -87,7 +87,7 @@ export default function LandCard({ land }: LandCardProps) {
           <div className="flex flex-wrap gap-1.5 min-w-0">
             <div className="bg-[#f4f4f5] border border-stone-200/20 text-stone-700 px-2.5 py-0.5 rounded-lg text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 shrink-0">
               <Sprout size={10.5} className="text-stone-400" />
-              <span>{land.type || 'Agricultural'}</span>
+              <span>{land.landType || 'Agricultural'}</span>
             </div>
 
             <div className="bg-[#f4f4f5] border border-stone-200/20 text-stone-700 px-2.5 py-0.5 rounded-lg text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 shrink-0">
