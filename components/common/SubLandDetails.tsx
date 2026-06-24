@@ -76,7 +76,10 @@ export default function SubLandDetails({ data }: SubLandDetailsProps) {
               {data.roadAccess ? "Road Access" : "Path Access"}
             </p>
             <p className="text-[11px] text-gray-500">
-              {data.roadAccess ? "Connected" : "Limited"}
+              {data.roadAccess 
+                ? (data.roadWidthM ? `${data.roadWidthM} Meters Width` : "Connected")
+                : "Limited"
+              }
             </p>
           </div>
 
@@ -108,6 +111,58 @@ export default function SubLandDetails({ data }: SubLandDetailsProps) {
             </p>
           </div>
 
+        </div>
+      </div>
+
+      {/* 🔥 FEASIBILITY & PLANNING DETAILS */}
+      <div className="space-y-5">
+        <h3 className="text-base sm:text-lg font-semibold text-gray-900 flex items-center gap-2">
+          <span className="w-[3px] h-5 bg-blue-500 rounded-full"></span>
+          Feasibility & Planning
+        </h3>
+
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 pl-3">
+          {/* Approval Type */}
+          <div className="group p-3 sm:p-4 rounded-xl bg-gray-50 border border-transparent hover:border-gray-200 hover:shadow-sm transition">
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Approval Type</p>
+            <p className="text-sm font-semibold text-gray-900">
+              {data.approvalType || "Not Specified"}
+            </p>
+            {data.approvalType === "CLU" && data.cluCategory && (
+              <p className="text-xs text-gray-600 mt-1 font-medium">
+                {data.cluCategory}
+              </p>
+            )}
+          </div>
+
+          {/* Municipal Limits */}
+          <div className="group p-3 sm:p-4 rounded-xl bg-gray-50 border border-transparent hover:border-gray-200 hover:shadow-sm transition">
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Municipal Jurisdiction</p>
+            <p className="text-sm font-semibold text-gray-900">
+              {data.municipalLimitType || "Not Specified"}
+            </p>
+          </div>
+
+          {/* Access Road */}
+          <div className="group p-3 sm:p-4 rounded-xl bg-gray-50 border border-transparent hover:border-gray-200 hover:shadow-sm transition">
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Road Connection</p>
+            <p className="text-sm font-semibold text-gray-900">
+              {data.roadAccess ? (data.accessType || "Yes (Road Connected)") : "Path Access Only"}
+            </p>
+          </div>
+
+          {/* Green Belt Zone */}
+          <div className="group p-3 sm:p-4 rounded-xl bg-gray-50 border border-transparent hover:border-gray-200 hover:shadow-sm transition">
+            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Green Belt Zone</p>
+            <p className="text-sm font-semibold text-gray-900">
+              {data.greenBelt ? "Yes (Within Green Belt)" : "No (Free Zone)"}
+            </p>
+            {data.greenBelt && data.greenBeltWidthM ? (
+              <p className="text-xs text-gray-600 mt-1 font-medium">
+                Width: {data.greenBeltWidthM} Meters
+              </p>
+            ) : null}
+          </div>
         </div>
       </div>
 

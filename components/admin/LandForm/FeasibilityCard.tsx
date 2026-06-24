@@ -131,7 +131,7 @@ export default function FeasibilityCard({
           <div className="space-y-5">
             {/* Approval Type */}
             <div className="space-y-1.5">
-              <Label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider ml-0.5">Approval Type</Label>
+              <Label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider ml-0.5">Approval Type <span className="text-red-500 font-extrabold">*</span></Label>
               <SearchableSelect
                 value={formData.approvalType || ""}
                 onChange={(val) => {
@@ -148,7 +148,7 @@ export default function FeasibilityCard({
             {/* CLU Category (conditional) */}
             {formData.approvalType === "CLU" && (
               <div className="space-y-1.5 animate-in fade-in slide-in-from-top-2 duration-200">
-                <Label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider ml-0.5">CLU Category</Label>
+                <Label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider ml-0.5">CLU Category <span className="text-red-500 font-extrabold">*</span></Label>
                 <SearchableSelect
                   value={formData.cluCategory || ""}
                   onChange={(val) => handleChange("cluCategory", val)}
@@ -174,7 +174,7 @@ export default function FeasibilityCard({
 
             {/* Municipal Limit Type */}
             <div className="space-y-1.5">
-              <Label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider ml-0.5">Municipal Limit Type</Label>
+              <Label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider ml-0.5">Municipal Limit Type <span className="text-red-500 font-extrabold">*</span></Label>
               <SearchableSelect
                 value={formData.municipalLimitType || ""}
                 onChange={(val) => handleChange("municipalLimitType", val)}
@@ -185,7 +185,7 @@ export default function FeasibilityCard({
 
             {/* Access Type */}
             <div className="space-y-1.5">
-              <Label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider ml-0.5">Access Type</Label>
+              <Label className="text-[10px] font-bold text-slate-500 uppercase tracking-wider ml-0.5">Access Type <span className="text-red-500 font-extrabold">*</span></Label>
               <SearchableSelect
                 value={formData.accessType || ""}
                 onChange={(val) => handleChange("accessType", val)}

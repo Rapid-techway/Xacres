@@ -125,11 +125,11 @@ export default function BrokerDetailsPage() {
         </div>
       </div>
 
-      {/* Grid Content */}
-      <div className="grid grid-cols-1 lg:grid-cols-10 gap-8">
+      {/* Broker Details Top Row */}
+      <div className="flex flex-col md:flex-row gap-8 items-start">
         
-        {/* Left Column - Broker Profile Card (3 cols on desktop) */}
-        <div className="lg:col-span-3 space-y-6">
+        {/* Left Column - Profile Card */}
+        <div className="w-full md:w-80 lg:w-[350px] shrink-0">
           <div className="bg-white rounded-2xl border border-stone-200/60 p-6 shadow-sm space-y-6">
             {/* Avatar & Basic */}
             <div className="flex flex-col items-center text-center pb-5 border-b border-stone-100">
@@ -145,7 +145,7 @@ export default function BrokerDetailsPage() {
                   {broker.officeName}
                 </p>
               ) : (
-                <p className="text-xs text-stone-400 italic font-medium mt-2">Individual Broker</p>
+                <p className="text-xs text-stone-404 italic font-medium mt-2">Individual Broker</p>
               )}
             </div>
 
@@ -159,7 +159,7 @@ export default function BrokerDetailsPage() {
                   {broker.phoneNumber}
                 </p>
                 {broker.alternatePhoneNumber && (
-                  <p className="font-semibold text-stone-850 flex items-center gap-1.5 pl-4.5 text-[11px]">
+                  <p className="font-semibold text-stone-855 flex items-center gap-1.5 pl-4.5 text-[11px]">
                     <span className="text-[9px] text-stone-400">Alt:</span>
                     {broker.alternatePhoneNumber}
                   </p>
@@ -222,10 +222,13 @@ export default function BrokerDetailsPage() {
               )}
             </div>
           </div>
+        </div>
 
+        {/* Right Column - Stack of Notes & Gallery */}
+        <div className="flex-1 w-full space-y-6">
           {/* Description Card */}
           {broker.description && (
-            <div className="bg-white rounded-2xl border border-stone-200/60 p-5 shadow-sm space-y-2.5">
+            <div className="bg-white rounded-2xl border border-stone-200/60 p-6 shadow-sm space-y-2.5 w-full">
               <p className="text-[9px] font-bold text-stone-400 uppercase tracking-widest">Internal Broker Notes</p>
               <p className="text-xs text-stone-750 font-sans italic leading-relaxed">
                 &ldquo;{broker.description}&rdquo;
@@ -235,9 +238,9 @@ export default function BrokerDetailsPage() {
 
           {/* Images Card */}
           {broker.images && broker.images.length > 0 && (
-            <div className="bg-white rounded-2xl border border-stone-200/60 p-5 shadow-sm space-y-3">
+            <div className="bg-white rounded-2xl border border-stone-200/60 p-6 shadow-sm space-y-3 w-full">
               <p className="text-[9px] font-bold text-stone-400 uppercase tracking-widest">Broker Gallery</p>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3">
                 {broker.images.map((img, i) => (
                   <div
                     key={i}
@@ -258,11 +261,12 @@ export default function BrokerDetailsPage() {
             </div>
           )}
         </div>
+      </div>
 
-        {/* Right Column - Managed Lands Table (7 cols on desktop) */}
-        <div className="lg:col-span-7 space-y-6">
-          <div className="bg-white rounded-2xl border border-stone-200/60 shadow-sm overflow-hidden flex flex-col h-full">
-            <div className="p-6 border-b border-stone-100 flex items-center justify-between gap-4 bg-stone-50/20">
+      {/* Managed Land Listings - Full Width Row */}
+      <div className="w-full space-y-6">
+        <div className="bg-white rounded-2xl border border-stone-200/60 shadow-sm overflow-hidden flex flex-col h-full">
+          <div className="p-6 border-b border-stone-100 flex items-center justify-between gap-4 bg-stone-50/20">
               <div>
                 <h2 className="text-sm font-sans font-bold text-stone-900 leading-tight">
                   Managed Land Listings
@@ -361,8 +365,6 @@ export default function BrokerDetailsPage() {
           </div>
         </div>
 
-      </div>
-
       {/* Lightbox Enlarged View Modal */}
       {selectedEnlargedImage && (
         <div
@@ -380,7 +382,7 @@ export default function BrokerDetailsPage() {
             </button>
             <div className="relative" onClick={(e) => e.stopPropagation()}>
               <Image
-                src={selectedEnlargedImage}
+                src={selectedEnlargedImage as string}
                 alt="Enlarged view"
                 width={800}
                 height={600}

@@ -145,6 +145,27 @@ export default function LandForm({ initialData = null }: LandFormProps) {
     if (formData.roadAccess !== undefined) {
       data.roadAccess = formData.roadAccess
     }
+    if (formData.roadAccess && formData.roadWidthM !== null && formData.roadWidthM !== undefined) {
+      data.roadWidthM = formData.roadWidthM
+    }
+    if (formData.approvalType && formData.approvalType.trim() !== '') {
+      data.approvalType = formData.approvalType
+    }
+    if (formData.approvalType === 'CLU' && formData.cluCategory && formData.cluCategory.trim() !== '') {
+      data.cluCategory = formData.cluCategory
+    }
+    if (formData.municipalLimitType && formData.municipalLimitType.trim() !== '') {
+      data.municipalLimitType = formData.municipalLimitType
+    }
+    if (formData.accessType && formData.accessType.trim() !== '') {
+      data.accessType = formData.accessType
+    }
+    if (formData.greenBelt !== undefined) {
+      data.greenBelt = formData.greenBelt
+    }
+    if (formData.greenBelt && formData.greenBeltWidthM !== null && formData.greenBeltWidthM !== undefined) {
+      data.greenBeltWidthM = formData.greenBeltWidthM
+    }
     return data
   }
 
@@ -449,6 +470,22 @@ export default function LandForm({ initialData = null }: LandFormProps) {
         alert("Broker Selection is required.");
         return;
       }
+    }
+    if (!formData.approvalType) {
+      alert("Approval Type is required.");
+      return;
+    }
+    if (formData.approvalType === "CLU" && !formData.cluCategory) {
+      alert("CLU Category is required when Approval Type is CLU.");
+      return;
+    }
+    if (!formData.municipalLimitType) {
+      alert("Municipal Limit Type is required.");
+      return;
+    }
+    if (!formData.accessType) {
+      alert("Access Type is required.");
+      return;
     }
     if (!formData.images || formData.images.length === 0) {
       alert("At least one property image must be uploaded.");

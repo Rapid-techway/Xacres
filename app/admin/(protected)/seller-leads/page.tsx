@@ -16,7 +16,6 @@ import {
   MapPin, 
   FileText, 
   Image as ImageIcon, 
-  ExternalLink,
   X,
   Save
 } from "lucide-react"
@@ -517,7 +516,7 @@ export default function AdminSellerLeadsPage() {
                       <div 
                         key={img.id || img.imageUrl || idx}
                         onClick={() => setActiveLightboxImage(img.imageUrl)}
-                        className="relative aspect-video bg-stone-50 border border-stone-200 rounded-xl overflow-hidden shadow-xs cursor-zoom-in hover:brightness-95 hover:border-stone-400 transition-all duration-200 group"
+                        className="relative aspect-video bg-stone-50 border border-stone-150 rounded-xl overflow-hidden cursor-pointer hover:opacity-90 transition-opacity"
                       >
                         <Image 
                           src={img.imageUrl} 
@@ -526,12 +525,6 @@ export default function AdminSellerLeadsPage() {
                           sizes="(max-width: 768px) 50vw, 33vw"
                           className="object-cover select-none"
                         />
-                        <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 flex items-center justify-center transition duration-150">
-                          <span className="text-[10px] bg-white/95 text-stone-850 font-bold px-2 py-1 rounded-lg shadow-md flex items-center gap-1.5 transform translate-y-1 group-hover:translate-y-0 transition duration-200">
-                            <ExternalLink size={10} />
-                            Enlarge
-                          </span>
-                        </div>
                       </div>
                     ))}
                   </div>
@@ -589,24 +582,29 @@ export default function AdminSellerLeadsPage() {
         {activeLightboxImage && (
           <SheetPortal>
             <div 
-              className="fixed inset-0 z-[110] bg-black/85 flex items-center justify-center p-4 animate-in fade-in duration-250"
+              className="fixed inset-0 z-[110] bg-black/75 flex items-center justify-center p-4 animate-in fade-in duration-200 backdrop-blur-xs"
               style={{ pointerEvents: "auto" }}
               onClick={() => setActiveLightboxImage(null)}
             >
-              <div className="relative max-w-5xl max-h-[90vh] w-full h-full flex items-center justify-center" onClick={(e) => e.stopPropagation()}>
-                <Image 
-                  src={activeLightboxImage} 
-                  alt="Enlarged Lead Image" 
-                  fill
-                  sizes="(max-width: 1024px) 100vw, 80vw"
-                  className="object-contain rounded-lg select-none shadow-2xl"
-                />
-                <button 
+              <div className="relative max-w-4xl max-h-[85vh] p-4 flex items-center justify-center">
+                {/* Close button */}
+                <button
+                  type="button"
                   onClick={() => setActiveLightboxImage(null)}
-                  className="absolute top-4 right-4 bg-white/10 hover:bg-white/20 text-white rounded-full p-2.5 transition backdrop-blur-md border border-white/15 cursor-pointer"
+                  className="absolute -top-10 right-2 p-2 bg-stone-900/80 text-white rounded-full hover:bg-stone-950 hover:scale-105 transition-all z-[10000] cursor-pointer"
                 >
-                  <X size={18} />
+                  <X size={16} />
                 </button>
+                <div className="relative" onClick={(e) => e.stopPropagation()}>
+                  <Image 
+                    src={activeLightboxImage} 
+                    alt="Enlarged Lead Image" 
+                    width={800}
+                    height={600}
+                    unoptimized
+                    className="object-contain rounded-lg max-h-[80vh] w-auto max-w-full shadow-2xl"
+                  />
+                </div>
               </div>
             </div>
           </SheetPortal>

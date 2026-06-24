@@ -131,7 +131,7 @@ export default function ImageGrid({ images, title }: ImageGridProps) {
       <div className="relative group rounded-xl overflow-hidden">
         <div className="aspect-[16/9] md:aspect-[21/9] w-full md:h-[350px]">
           <div
-            className={`grid h-full w-full gap-2 
+            className={`grid h-full w-full gap-1 md:gap-1.25 
             ${displayImages.length === 1 ? "grid-cols-1" : ""}
             ${displayImages.length === 2 ? "grid-cols-2" : ""}
             ${displayImages.length >= 3 ? "grid-cols-4 grid-rows-2" : ""}
