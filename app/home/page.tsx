@@ -9,7 +9,7 @@ import { Footer1 } from '@/components/home/footer';
 
 export const metadata: Metadata = {
   title: 'Xacres - Direct, Verified & Hassle-free Land in Haryana',
-  description: 'Discover premium land opportunities in Haryana with absolute clarity. Explore agricultural, farming, and commercial land listings directly from verified owners.',
+  description: 'Discover. premium land opportunities in Haryana with absolute clarity. Explore agricultural, farming, and commercial land listings directly from verified owners.',
 };
 
 export default function Home2Page() {
