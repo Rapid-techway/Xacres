@@ -39,22 +39,7 @@ export default function HeroLayout() {
           <Logo />
         </div>
 
-        {/* Desktop Navigation Links */}
-        <nav className="hidden md:flex items-center gap-10">
-          <Link href="/lands" className="text-white font-semibold text-sm hover:text-white/80 transition relative pb-1.5 group">
-            Lands
-            <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1.5 h-1.5 bg-blue-600 rounded-full shadow-[0_0_8px_rgba(37,99,235,0.8)]" />
-          </Link>
-          <Link href="/ai" className="text-white/70 font-semibold text-sm hover:text-white transition pb-1.5">
-            AI Search
-          </Link>
-          <Link href="#" className="text-white/70 font-semibold text-sm hover:text-white transition pb-1.5">
-            About Us
-          </Link>
-          <Link href="#" className="text-white/70 font-semibold text-sm hover:text-white transition pb-1.5">
-            Contact
-          </Link>
-        </nav>
+        {/* Desktop Navigation Links - Removed redundant links as side CTA options are present */}
 
         {/* Right CTA / Action buttons */}
         <div className="hidden md:flex items-center gap-3">
@@ -115,20 +100,7 @@ export default function HeroLayout() {
               >
                 AI Search <ChevronRight size={18} className="text-stone-500" />
               </Link>
-              <Link
-                href="#"
-                onClick={() => setMobileMenuOpen(false)}
-                className="text-2xl font-bold text-white/70 flex items-center justify-between"
-              >
-                About Us <ChevronRight size={18} className="text-stone-500" />
-              </Link>
-              <Link
-                href="#"
-                onClick={() => setMobileMenuOpen(false)}
-                className="text-2xl font-bold text-white/70 flex items-center justify-between"
-              >
-                Contact <ChevronRight size={18} className="text-stone-500" />
-              </Link>
+
             </nav>
           </div>
 
@@ -222,7 +194,7 @@ export default function HeroLayout() {
 
             {/* Secondary CTA: View Map */}
             <Link
-              href="/map"
+              href="/"
               className="w-auto bg-white/10 hover:bg-black/45 text-white border border-white/10 backdrop-blur font-semibold px-6 py-3.5 rounded-full transition-all flex items-center justify-center gap-3 active:scale-[0.98] shadow-lg cursor-pointer"
             >
               <Map size={18} className="text-white" />

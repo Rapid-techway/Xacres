@@ -56,7 +56,7 @@ export default function MapSection() {
                 {districts.map((district) => (
                   <Link
                     key={district}
-                    href={`/lands?district=${district}`}
+                    href={`/lands/district/${district.toLowerCase().replace(/\s+/g, '-')}`}
                     className="bg-white hover:bg-stone-50 text-stone-800 font-bold px-5 py-2.5 rounded-full text-xs transition-all border border-stone-200/40 hover:border-stone-300/60 shadow-sm active:scale-95 hover:shadow"
                   >
                     {district}

@@ -13,7 +13,7 @@ export default function Loading() {
       </div>
 
       {/* Image Grid Skeleton (Airbnb Style) */}
-      <div className="grid grid-cols-1 md:grid-cols-4 md:grid-rows-2 h-[200px] sm:h-[350px] md:h-[350px] gap-2 md:gap-3 rounded-3xl overflow-hidden shadow-sm">
+      <div className="grid grid-cols-1 md:grid-cols-4 md:grid-rows-2 h-[200px] sm:h-[350px] md:h-[350px] gap-1 md:gap-1.25 rounded-3xl overflow-hidden shadow-sm -mt-3">
         <div className="md:col-span-2 md:row-span-2 bg-gray-200 h-full w-full" />
         <div className="hidden md:block bg-gray-200 h-full w-full" />
         <div className="hidden md:block bg-gray-200 h-full w-full" />

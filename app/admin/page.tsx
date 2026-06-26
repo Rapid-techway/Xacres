@@ -26,8 +26,19 @@ export default function AdminRoot() {
   }, [router])
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <p className="text-sm text-gray-500">Checking authentication...</p>
+    <div className="min-h-screen flex flex-col items-center justify-center bg-[#f8f9fa]">
+      <div className="text-center space-y-1.5">
+        <h1 className="text-4xl font-black tracking-tight text-gray-900 font-sans">
+          Xacres
+        </h1>
+        <p className="text-xs font-bold uppercase tracking-[0.2em] text-gray-400">
+          Admin Panel
+        </p>
+        <div className="pt-6 flex items-center justify-center gap-2 text-xs text-gray-400/70 font-semibold uppercase tracking-wider">
+          <span className="w-1.5 h-1.5 bg-blue-600 rounded-full animate-pulse" />
+          Verifying Session
+        </div>
+      </div>
     </div>
   )
 }

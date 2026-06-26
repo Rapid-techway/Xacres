@@ -33,6 +33,49 @@ export default function SearchableSelect({
     o.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
+  const handleSearchKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === " ") {
+      e.stopPropagation();
+      return;
+    }
+
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      const content = e.currentTarget.closest('[role="menu"]') as HTMLElement;
+      if (content) {
+        const firstItem = content.querySelector('[role="menuitem"]') as HTMLElement;
+        if (firstItem) {
+          firstItem.focus();
+        }
+      }
+      return;
+    }
+
+    if (e.key === "Escape") {
+      return;
+    }
+
+    if (e.key !== "ArrowDown" && e.key !== "ArrowUp" && e.key !== "Enter") {
+      e.stopPropagation();
+    }
+  };
+
+  const handleItemKeyDown = (e: React.KeyboardEvent, index: number) => {
+    if (e.key === "ArrowUp" && index === 0) {
+      e.preventDefault();
+      const content = e.currentTarget.closest('[role="menu"]') as HTMLElement;
+      if (content) {
+        const input = content.querySelector('input[type="text"]') as HTMLInputElement;
+        if (input) {
+          input.focus();
+          const val = input.value;
+          input.value = "";
+          input.value = val;
+        }
+      }
+    }
+  };
+
   return (
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
       <DropdownMenuTrigger asChild>
@@ -60,7 +103,7 @@ export default function SearchableSelect({
               placeholder={searchPlaceholder}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyDown={(e) => e.stopPropagation()} // Prevent Radix from closing on space key
+              onKeyDown={handleSearchKeyDown}
               className="w-full h-9 pl-9 pr-3 bg-slate-50 border border-slate-100 rounded-lg text-xs font-semibold focus:bg-white focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/10 outline-none"
               autoFocus
             />
@@ -69,7 +112,7 @@ export default function SearchableSelect({
         
         <div className="max-h-52 overflow-y-auto custom-scrollbar space-y-0.5">
           {filteredOptions.length > 0 ? (
-            filteredOptions.map((opt) => {
+            filteredOptions.map((opt, index) => {
               const isSelected = value === opt
               return (
                 <DropdownMenuItem
@@ -78,6 +121,7 @@ export default function SearchableSelect({
                     onChange(opt)
                     setSearchQuery("")
                   }}
+                  onKeyDown={(e) => handleItemKeyDown(e, index)}
                   className={`flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer transition-all focus:bg-emerald-50 focus:text-emerald-700 outline-none text-xs ${
                     isSelected ? "bg-emerald-50 text-emerald-700 font-bold" : "text-slate-650 font-medium"
                   }`}

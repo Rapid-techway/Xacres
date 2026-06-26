@@ -1,6 +1,12 @@
 import { Footer1 } from "@/components/home/footer";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Terms & Conditions | Xacres",
+  description: "Read the terms of service and conditions for using the Xacres land discovery platform. Review our liability disclaimers and user responsibilities.",
+};
 
 export default function TermsAndConditions() {
   return (

@@ -61,7 +61,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     );
 
     const districtUrls = uniqueDistricts.map((district) => ({
-      url: `${baseUrl}/lands/district/${district.toLowerCase()}`,
+      url: `${baseUrl}/lands/district/${district.toLowerCase().replace(/\s+/g, '-')}`,
       lastModified: new Date(),
       changeFrequency: 'daily' as const,
       priority: 0.7,

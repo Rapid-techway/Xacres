@@ -1,6 +1,12 @@
 import { Footer1 } from "@/components/home/footer";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Privacy Policy | Xacres",
+  description: "Read the Xacres Privacy Policy to understand our data, analytics, and cookie practices. We prioritize your privacy and transparency.",
+};
 
 export default function PrivacyPolicy() {
   return (

@@ -4,6 +4,7 @@ import { MapPin, Grid } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import LandCard from '@/components/common/LandCard';
 import { Land } from '@/lib/types';
+import { HARYANA_DISTRICTS } from '@/lib/static';
 
 interface PageProps {
   params: Promise<{ district: string }>;
@@ -60,9 +61,14 @@ function mapDbLandToFrontend(dbLand: DbLand, images: DbImage[] = []): Land {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { district } = await params;
-  const rawDistrict = decodeURIComponent(district);
-  const formattedDistrict = rawDistrict.charAt(0).toUpperCase() + rawDistrict.slice(1).toLowerCase();
+  const rawDistrict = decodeURIComponent(district).replace(/-/g, ' ');
+  
+  // Look up case-insensitive match in static districts list, fall back to basic title casing
+  const formattedDistrict = HARYANA_DISTRICTS.find(
+    (d) => d.toLowerCase() === rawDistrict.toLowerCase()
+  ) || (rawDistrict.charAt(0).toUpperCase() + rawDistrict.slice(1).toLowerCase());
 
+  const slug = district.toLowerCase().replace(/\s+/g, '-');
   const title = `Farmland & Agricultural Land for Sale in ${formattedDistrict}, Haryana | Xacres`;
   const description = `Explore available farm plots, agricultural land, and highway properties for sale in ${formattedDistrict}, Haryana. View map locations, sizes, and price details on Xacres.`;
 
@@ -70,12 +76,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     title,
     description,
     alternates: {
-      canonical: `/lands/district/${district.toLowerCase()}`,
+      canonical: `/lands/district/${slug}`,
     },
     openGraph: {
       title,
       description,
-      url: `/lands/district/${district.toLowerCase()}`,
+      url: `/lands/district/${slug}`,
       type: 'website',
       siteName: 'Xacres',
       locale: 'en_IN',
@@ -94,8 +100,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function DistrictLandsPage({ params }: PageProps) {
   const { district } = await params;
-  const rawDistrict = decodeURIComponent(district);
-  const formattedDistrict = rawDistrict.charAt(0).toUpperCase() + rawDistrict.slice(1).toLowerCase();
+  const rawDistrict = decodeURIComponent(district).replace(/-/g, ' ');
+  
+  // Look up case-insensitive match in static districts list, fall back to basic title casing
+  const formattedDistrict = HARYANA_DISTRICTS.find(
+    (d) => d.toLowerCase() === rawDistrict.toLowerCase()
+  ) || (rawDistrict.charAt(0).toUpperCase() + rawDistrict.slice(1).toLowerCase());
 
   // 1. Fetch matching lands from Supabase
   const { data: dbLands, error: landsError } = await supabase
