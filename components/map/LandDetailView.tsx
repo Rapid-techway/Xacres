@@ -96,7 +96,6 @@ export default function LandDetailView({ land, onClose }: LandDetailViewProps) {
               src={land.images[currentImageIndex]?.url}
               alt={`${land.area} acres - ${currentImageIndex + 1}`}
               fill
-              unoptimized
               onLoad={() => setIsImageLoaded(true)}
               className={`object-cover transition-all duration-700 ${isImageLoaded ? 'opacity-100' : 'opacity-0'}`}
             />

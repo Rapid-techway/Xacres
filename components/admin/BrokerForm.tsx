@@ -533,7 +533,6 @@ export default function BrokerForm({ initialData = null }: BrokerFormProps) {
                     src={img.imageUrl}
                     alt={`Broker photo ${i + 1}`}
                     fill
-                    unoptimized
                     sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, 20vw"
                     className="object-cover cursor-pointer hover:scale-105 transition-transform duration-300"
                     onClick={() => setSelectedEnlargedImage(img.imageUrl)}
@@ -602,7 +601,6 @@ export default function BrokerForm({ initialData = null }: BrokerFormProps) {
                 alt="Enlarged view"
                 width={800}
                 height={600}
-                unoptimized
                 className="object-contain rounded-lg max-h-[80vh] w-auto max-w-full shadow-2xl"
               />
             </div>

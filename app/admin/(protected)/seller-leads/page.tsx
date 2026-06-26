@@ -601,7 +601,6 @@ export default function AdminSellerLeadsPage() {
                     alt="Enlarged Lead Image" 
                     width={800}
                     height={600}
-                    unoptimized
                     className="object-contain rounded-lg max-h-[80vh] w-auto max-w-full shadow-2xl"
                   />
                 </div>

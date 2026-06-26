@@ -99,7 +99,6 @@ export default function MediaCard({
                 src={img.url}
                 alt="Listing photo thumbnail"
                 fill
-                unoptimized
                 sizes="33vw"
                 className="object-cover group-hover:scale-105 transition-transform duration-500"
               />

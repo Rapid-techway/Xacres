@@ -250,7 +250,6 @@ export default function BrokerDetailsPage() {
                       src={img.imageUrl}
                       alt={`Broker gallery image ${i + 1}`}
                       fill
-                      unoptimized
                       sizes="33vw"
                       className="object-cover"
                       onClick={() => setSelectedEnlargedImage(img.imageUrl)}
@@ -386,7 +385,6 @@ export default function BrokerDetailsPage() {
                 alt="Enlarged view"
                 width={800}
                 height={600}
-                unoptimized
                 className="object-contain rounded-lg max-h-[80vh] w-auto max-w-full shadow-2xl"
               />
             </div>
