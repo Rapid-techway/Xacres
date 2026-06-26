@@ -220,10 +220,16 @@ export const brokerService = {
       }
 
       const serialStr = String(nextSerial).padStart(3, '0');
-      const repCode = reputation === 'SILVER' ? 's' : reputation === 'GOLD' ? 'g' : 'd';
+      const repCode = reputation === 'SILVER' ? 'S' : reputation === 'GOLD' ? 'G' : 'D';
       
-      const cleanDistrict = district.trim().toLowerCase().replace(/\s+/g, '-');
-      const cleanTehsil = tehsil.trim().toLowerCase().replace(/\s+/g, '-');
+      const capitalize = (str: string) => 
+        str.trim()
+          .split(/\s+/)
+          .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+          .join('-');
+
+      const cleanDistrict = capitalize(district);
+      const cleanTehsil = capitalize(tehsil);
 
       return `${cleanDistrict}/${cleanTehsil}/${repCode}/${serialStr}`;
     } catch (error) {
