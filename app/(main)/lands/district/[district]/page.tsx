@@ -92,8 +92,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       description,
     },
     robots: {
-      index: true,
-      follow: true,
+      index: process.env.NEXT_PUBLIC_APP_URL === "https://xacres.com",
+      follow: process.env.NEXT_PUBLIC_APP_URL === "https://xacres.com",
     }
   };
 }

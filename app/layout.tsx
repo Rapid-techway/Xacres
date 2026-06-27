@@ -13,6 +13,8 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 })
 
+const isProd = process.env.NEXT_PUBLIC_APP_URL === "https://xacres.com";
+
 export const metadata: Metadata = {
   metadataBase: new URL("https://xacres.vercel.app"),
 
@@ -64,8 +66,8 @@ export const metadata: Metadata = {
   },
 
   robots: {
-    index: true,
-    follow: true,
+    index: isProd,
+    follow: isProd,
   },
 
   manifest: "/manifest.json",
